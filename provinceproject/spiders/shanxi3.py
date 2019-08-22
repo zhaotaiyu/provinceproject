@@ -53,6 +53,5 @@ class Shanxi3Spider(scrapy.Spider):
         shanxi3["is_delete"] =0
         yield shanxi3
 
-        pass
 
 

@@ -373,6 +373,31 @@ class AnhuiItem(scrapy.Item):
     create_time = scrapy.Field()
     modification_time = scrapy.Field()
     is_delete = scrapy.Field()
+#河南
+class HenanItem(scrapy.Item):
+    collection = "henan"
+    id = scrapy.Field()
+    name = scrapy.Field()
+    reg_address = scrapy.Field()
+    build_date = scrapy.Field()
+    address = scrapy.Field()
+    leal_person = scrapy.Field()
+    contact_person = scrapy.Field()
+    social_credit_code = scrapy.Field()
+    regis_type = scrapy.Field()
+    postalcode = scrapy.Field()
+    tech_lead_duty = scrapy.Field()
+    website = scrapy.Field()
+    aptitude_type = scrapy.Field()
+    aptitude_num = scrapy.Field()
+    aptitude_accept_date = scrapy.Field()
+    aptitude_range = scrapy.Field()
+    aptitude_organ = scrapy.Field()
+    aptitude_useful_date = scrapy.Field()
+    url = scrapy.Field()
+    create_time = scrapy.Field()
+    modification_time = scrapy.Field()
+    is_delete = scrapy.Field()
 
 
 

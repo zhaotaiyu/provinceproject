@@ -6,11 +6,11 @@ import json
 import datetime
 
 class AnhuibeianSpider(scrapy.Spider):
-    name = 'anhuibeian'
-    #allowed_domains = ['dohurd.ah.gov.cn/ahzjt_Front']
-    start_urls = ['http://dohurd.ah.gov.cn/ahzjt_Front/']
+	name = 'anhuibeian'
+	#allowed_domains = ['dohurd.ah.gov.cn/ahzjt_Front']
+	start_urls = ['http://dohurd.ah.gov.cn/ahzjt_Front/']
 
-    def parse(self, response):
+	def parse(self, response):
 		try:
 			data = json.loads(response.text).get("all")
 			pageindex = int(data.get("pageindex",0))
