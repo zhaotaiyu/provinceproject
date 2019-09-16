@@ -5,31 +5,31 @@ import datetime
 import scrapy
 from scrapy import FormRequest,Request
 from provinceproject.items import *
-
 class NingxiaSpider(scrapy.Spider):
     name = 'ningxia'
     #allowed_domains = ['www.nxjscx.com.cn/qysj.htm#']
     start_urls = ['http://www.nxjscx.com.cn/qysj.htm#/']
     def start_requests(self):
         url = "http://218.95.173.11:8092/portal.php?"
-        list=[1,2,3,4,5,6,7,10,11,12]
-        for ci_qualification_code in list:
+        p_list=[1,2,3,4,5,6,7,10,11,12]
+        #p_list = [1]
+        for ci_qualification_code in p_list:
             formdata={
                 'page': '1',
                 'resid': 'web_company.quaryCorp',
                 'ci_qualification_code': str(ci_qualification_code),
                 'ci_islocal_code': 'JN01',
-                'rows': '99999'
+                'rows': '15'
             }
-            yield FormRequest(url,callback=self.parse,formdata=formdata)
+            yield FormRequest(url,callback=self.parse,formdata=formdata,meta={'ci_qualification_code':ci_qualification_code,'page':'1'})
             beianformdata = {
                 'page': '1',
                 'resid': 'web_company.quaryCorp',
                 'ci_qualification_code': str(ci_qualification_code),
                 'ci_islocal_code': 'JN02',
-                'rows': '99999'
+                'rows': '15'
             }
-            yield FormRequest(url, callback=self.parse_beian, formdata=beianformdata)
+            yield FormRequest(url, callback=self.parse_beian, formdata=beianformdata,meta={'ci_qualification_code':ci_qualification_code,'page':'1'})
 
     def parse(self, response):
         data=json.loads(response.text).get("data")
@@ -39,6 +39,19 @@ class NingxiaSpider(scrapy.Spider):
                 corp_id=info.get("corp_id")
                 company_url="http://218.95.173.11:8092/selectact/query.jspx?resid=IDIXWP2KBO&rowid={}&rows=10".format(rowid)
                 yield Request(company_url,callback=self.parse_company,meta={"corp_id":corp_id})
+        if len(data)==15:
+            request = self.next_page(response.meta.get("page"),response.meta.get("ci_qualification_code"),response.url,back=self.parse,ci_islocal_code='JN01')
+            yield request
+    def next_page(self,page,ci_qualification_code,url,back,ci_islocal_code):
+        page = str(int(page)+1)
+        formdata = {
+            'page': page,
+            'resid': 'web_company.quaryCorp',
+            'ci_qualification_code': str(ci_qualification_code),
+            'ci_islocal_code': ci_islocal_code,
+            'rows': '15'
+        }
+        return FormRequest(url, callback=back, formdata=formdata,meta={'ci_qualification_code': ci_qualification_code, 'page': page})
 
     def parse_company(self,response):
         data_list = json.loads(response.text).get("data")
@@ -93,6 +106,9 @@ class NingxiaSpider(scrapy.Spider):
                 beian["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 beian["is_delete"] = 0
                 yield beian
+        if len(data)==15:
+            request = self.next_page(response.meta.get("page"),response.meta.get("ci_qualification_code"),response.url,back=self.parse_beian,ci_islocal_code='JN02')
+            yield request
 
 
 
