@@ -66,8 +66,8 @@ DOWNLOADER_MIDDLEWARES = {
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     # #'provinceproject.pipelines.CeshiPipeline': 209,
-    # 'provinceproject.pipelines.ProvinceprojectPipeline': 300,
-    # 'provinceproject.pipelines.PgsqlPipeline': 301,
+    'provinceproject.pipelines.ProvinceprojectPipeline': 300,
+    'provinceproject.pipelines.PgsqlPipeline': 301,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -108,17 +108,7 @@ RETRY_TIMES = 10
 PROXYUSER="H7895G9300YN511D"
 PROXYPASS="AC67F9AA92D6F49F"
 PROXYSERVER="http://http-dyn.abuyun.com:9020"
-
-# DOWNLOADER_MIDDLEWARES_BASE = {
-#     'scrapy.downloadermiddlewares.robotstxt.RobotsTxtMiddleware': 100,
-#     'scrapy.downloadermiddlewares.httpauth.HttpAuthMiddleware': 300,
-#     'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': 400,
-#     'scrapy.downloadermiddlewares.retry.RetryMiddleware': 500,
-#     'scrapy.downloadermiddlewares.defaultheaders.DefaultHeadersMiddleware': 550,
-#     #'scrapy.downloadermiddlewares.redirect.RedirectMiddleware': 600,
-#     'scrapy.downloadermiddlewares.cookies.CookiesMiddleware': 700,
-#     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 750,
-#     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 800,
-#     'scrapy.downloadermiddlewares.stats.DownloaderStats': 850,
-#     'scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware': 900,
-# }
+#MONGO配置
+MONGOCLIENT='mongodb://ecs-a025-0002:27017/'
+MONGODATABASE='error'
+MONGOTABLE='province'

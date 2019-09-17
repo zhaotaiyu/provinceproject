@@ -436,6 +436,9 @@ class HainanItem(scrapy.Item):
     aptitude_type_s = scrapy.Field()
     url = scrapy.Field()
     danweitype = scrapy.Field()
+    create_time = scrapy.Field()
+    modification_time = scrapy.Field()
+    is_delete = scrapy.Field()
 
 
 

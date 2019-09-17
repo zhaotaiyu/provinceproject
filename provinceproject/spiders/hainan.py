@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import datetime
+
 import scrapy
 from scrapy import FormRequest, Request
 from provinceproject.items import *
@@ -16,8 +18,8 @@ class HainanSpider(scrapy.Spider):
                 "//a[@id='ID_IntegrityMge_ucCreditCompanyInfoListZJ_ucPager1_btnLast']/text()").extract_first())
             __VIEWSTATE = response.xpath("//input[@id='__VIEWSTATE']/@value").extract_first()
             __VIEWSTATEGENERATOR = response.xpath("//input[@id='__VIEWSTATEGENERATOR']/@value").extract_first()
-            # for page in range(1,total_page):
-            for page in range(1, 4):
+            for page in range(1,total_page):
+            #for page in range(1, 4):
                 formdata = {
                     '__VIEWSTATE': __VIEWSTATE,
                     '__VIEWSTATEGENERATOR': __VIEWSTATEGENERATOR,
@@ -67,6 +69,9 @@ class HainanSpider(scrapy.Spider):
         hainan["registered_capital"] = response.xpath("//span[@id='ID_IntegrityMge_ucShow_txtRegPrin']/text()").extract_first()
         hainan["build_date"] = response.xpath("//span[@id='ID_IntegrityMge_ucShow_txtFoundDate']/text()").extract_first()
         hainan["url"] = response.url
+        hainan["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        hainan["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        hainan["is_delete"] = 0
         table_list = response.xpath("//center/table")
         for table in table_list:
             hainan["aptitude_type"] = table.xpath("./tr[2]/td/table/tr[2]/td[2]/span/text()").extract_first()
@@ -98,5 +103,8 @@ class HainanSpider(scrapy.Spider):
         hainan["aptitude_accept_date"] = response.xpath("//span[@id='ID_IntegrityMge_ucShowZJ_ucCorpCertListShow1_listCert_ctl00_ucCorpCertShow1_txtOrganDate']/text()").extract_first()
         hainan["aptitude_organ"] = response.xpath("//span[@id='ID_IntegrityMge_ucShowZJ_ucCorpCertListShow1_listCert_ctl00_ucCorpCertShow1_txtOrganName']/text()").extract_first()
         hainan["aptitude_level"] = response.xpath("//span[@id='ID_IntegrityMge_ucShowZJ_ucCorpCertListShow1_listCert_ctl00_ucCorpCertShow1_txtTitleLevelNum']/text()").extract_first()
+        hainan["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        hainan["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        hainan["is_delete"] = 0
         yield hainan
 

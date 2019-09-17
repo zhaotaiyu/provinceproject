@@ -4,7 +4,11 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+import datetime
+import pymongo
 import psycopg2
+from .settings import *
+
 
 class CeshiPipeline(object):
     def process_item(self, item, spider):
@@ -13,7 +17,7 @@ class CeshiPipeline(object):
 class ProvinceprojectPipeline(object):
     def process_item(self, item, spider):
         for key, value in item.items():
-            if value == None:
+            if value is None:
                 item[key] = "None"
         return item
 
@@ -65,17 +69,19 @@ class PgsqlPipeline(object):
             self.db.commit()
             print("写入一条")
         except Exception as e:
-            print(e)
-            print(sql)
             self.db.rollback()
-            stop=input("is ok ?")
-            if stop =="y":
-                try:
-                    self.db = psycopg2.connect(database=self.pgsql_db, user=self.pgsql_user, password=self.pgsql_pass,
-                                               host=self.pgsql_uri, port=self.pgsql_port)
-                    self.cursor = self.db.cursor()
-                    self.cursor.execute(sql)
-                    self.db.commit()
-                except:
-                    stop=input("not ok")
+            try:
+                self.db = psycopg2.connect(database=self.pgsql_db, user=self.pgsql_user, password=self.pgsql_pass,
+                                           host=self.pgsql_uri, port=self.pgsql_port)
+                self.cursor = self.db.cursor()
+                self.cursor.execute(sql)
+                self.db.commit()
+            except:
+                myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
+                mydb = myclient[MONGODATABASE]
+                mycol = mydb[MONGOTABLE]
+                mydict = {"item": item, "reason": "写入数据库失败", 'sql': sql,
+                          'time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                mycol.insert_one(mydict)
+                myclient.close()
         return item
