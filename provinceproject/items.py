@@ -416,6 +416,26 @@ class QinghaiItem(scrapy.Item):
     create_time = scrapy.Field()
     modification_time = scrapy.Field()
     is_delete = scrapy.Field()
+class HainanItem(scrapy.Item):
+    collection = "hainan"
+    id = scrapy.Field()
+    name = scrapy.Field()
+    social_credit_code = scrapy.Field()
+    reg_address = scrapy.Field()
+    address = scrapy.Field()
+    leal_person = scrapy.Field()
+    registered_capital = scrapy.Field()
+    build_date = scrapy.Field()
+    aptitude_type = scrapy.Field()
+    aptitude_useful_date = scrapy.Field()
+    aptitude_num = scrapy.Field()
+    aptitude_accept_date = scrapy.Field()
+    aptitude_organ = scrapy.Field()
+    aptitude_type_b = scrapy.Field()
+    aptitude_level = scrapy.Field()
+    aptitude_type_s = scrapy.Field()
+    url = scrapy.Field()
+    danweitype = scrapy.Field()
 
 
 
