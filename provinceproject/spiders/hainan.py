@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import datetime
-
 import scrapy
 from scrapy import FormRequest, Request
 from provinceproject.items import *
@@ -35,8 +34,8 @@ class HainanSpider(scrapy.Spider):
                 "//a[@id='ID_IntegrityMge_ucCreditCompanyInfoList_ucPager1_btnLast']/text()").extract_first())
             __VIEWSTATE = response.xpath("//input[@id='__VIEWSTATE']/@value").extract_first()
             __VIEWSTATEGENERATOR = response.xpath("//input[@id='__VIEWSTATEGENERATOR']/@value").extract_first()
-            # for page in range(1,total_page):
-            for page in range(1, 4):
+            for page in range(1,total_page):
+            #for page in range(1, 4):
                 formdata = {
                     '__VIEWSTATE':__VIEWSTATE,
                     '__VIEWSTATEGENERATOR': __VIEWSTATEGENERATOR,

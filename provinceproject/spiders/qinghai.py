@@ -4,6 +4,7 @@ import re
 import scrapy
 from scrapy import FormRequest, Request
 from provinceproject.items import *
+import json
 
 
 class QinghaiSpider(scrapy.Spider):
@@ -12,10 +13,12 @@ class QinghaiSpider(scrapy.Spider):
     start_urls = ['http://139.170.150.135/dataservice/query/comp/list/SW','http://139.170.150.135/dataservice/query/comp/list/BS']
 
     def parse(self, response):
-        total_page = int(re.findall('.*?\$total":(\d+)',response.xpath("//div[@class='clearfix']/script/text()").extract_first())[0])
-
-        # for page in range(1,total_page):
-        for page in range(1, 3):
+        total_page = dict(response.xpath("//a[@sf='pagebar']/@*[name()='sf:data']").extract_first().strip("()")).get("pc")
+        print(total_page)
+        for page in range(1,total_page):
+        #for page in range(5, 10):
+            print("8888888888888888888")
+            print(page)
             formdata = {
                 '$total':str(total_page),
                 '$reload':'0',
@@ -27,8 +30,11 @@ class QinghaiSpider(scrapy.Spider):
         mark = response.url.split("/")[-1]
         tr_list = response.xpath("//table[@class='table_box']/tbody/tr")
         for tr in tr_list:
-            company_url = "http://139.170.150.135" + tr.xpath("./@onclick").extract_first().split("'")[1]
-            yield Request(company_url,callback=self.parse_company,meta={"mark":mark})
+            try:
+                company_url = "http://139.170.150.135" + tr.xpath("./@onclick").extract_first().split("'")[1]
+                yield Request(company_url,callback=self.parse_company,meta={"mark":mark})
+            except:
+                print(response.text)
     def parse_company(self,response):
         if response.meta.get("mark") == "BS":
             qinghai = QinghaiItem()

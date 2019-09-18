@@ -398,6 +398,7 @@ class HenanItem(scrapy.Item):
     create_time = scrapy.Field()
     modification_time = scrapy.Field()
     is_delete = scrapy.Field()
+#青海
 class QinghaiItem(scrapy.Item):
     collection = "qinghai"
     id = scrapy.Field()
@@ -416,6 +417,7 @@ class QinghaiItem(scrapy.Item):
     create_time = scrapy.Field()
     modification_time = scrapy.Field()
     is_delete = scrapy.Field()
+#海南
 class HainanItem(scrapy.Item):
     collection = "hainan"
     id = scrapy.Field()
