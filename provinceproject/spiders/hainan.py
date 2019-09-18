@@ -28,7 +28,7 @@ class HainanSpider(scrapy.Spider):
                     'ID_IntegrityMge_ucCreditCompanyInfoListZJ$ucPager1$txtCurrPage': str(page),
                     'ID_IntegrityMge_ucCreditCompanyInfoListZJ$ucPager1$btnGo': '确定',
                 }
-                yield FormRequest(response.url, formdata=formdata, callback=self.parse_companylist)
+                yield FormRequest(response.url, formdata=formdata, callback=self.parse_companylist,meta={'dont_redirect':False})
         else:
             total_page = int(response.xpath(
                 "//a[@id='ID_IntegrityMge_ucCreditCompanyInfoList_ucPager1_btnLast']/text()").extract_first())
@@ -45,24 +45,24 @@ class HainanSpider(scrapy.Spider):
                     'ID_IntegrityMge_ucCreditCompanyInfoList$ucPager1$txtCurrPage': str(page),
                     'ID_IntegrityMge_ucCreditCompanyInfoList$ucPager1$btnGo': '确定',
                 }
-                yield FormRequest(response.url,formdata=formdata,callback=self.parse_companylist)
+                yield FormRequest(response.url,formdata=formdata,callback=self.parse_companylist,meta={'dont_redirect':False})
     def parse_companylist(self,response):
         if response.url == 'http://www.hizj.net:8008/WebSite_Publish/Default.aspx?action=IntegrityMge/ucCreditCompanyInfoListZJ&Type=%E9%80%A0%E4%BB%B7%E5%92%A8%E8%AF%A2%E4%BC%81%E4%B8%9A%E8%B5%84%E8%B4%A8':
             tr_list = response.xpath("//table[@id='ID_IntegrityMge_ucCreditCompanyInfoListZJ_gridView']/tr")
             for tr in tr_list[1:]:
                 company_url = "http://www.hizj.net:8008/WebSite_Publish/" + tr.xpath("./td[2]/a/@href").extract_first()
-                yield Request(company_url, callback=self.parse_zjzxcompany)
+                yield Request(company_url, callback=self.parse_zjzxcompany,meta={'dont_redirect':False})
         else:
             tr_list = response.xpath("//table[@id='ID_IntegrityMge_ucCreditCompanyInfoList_gridView']/tr")
             for tr in tr_list[1:]:
                 company_url = "http://www.hizj.net:8008/WebSite_Publish/" + tr.xpath("./td[2]/a/@href").extract_first()
-                yield Request(company_url,callback=self.parse_company)
+                yield Request(company_url,callback=self.parse_company,meta={'dont_redirect':False})
     def parse_company(self,response):
         hainan = HainanItem()
         hainan["id"] = response.url.split("=")[-1]
         hainan["name"] = response.xpath("//span[@id='ID_IntegrityMge_ucShow_lbCompanyInfoName']/text()").extract_first()
         hainan["social_credit_code"] = response.xpath("//span[@id='ID_IntegrityMge_ucShow_txtOrganization']/text()").extract_first()
-        hainan["reg_address"] = response.xpath("//span[@id='ID_IntegrityMge_ucShow_lbProvince']/text()").extract_first() + "-" + response.xpath("//span[@id='ID_IntegrityMge_ucShow_lbCityNum']/text()").extract_first()
+        hainan["reg_address"] = str(response.xpath("//span[@id='ID_IntegrityMge_ucShow_lbProvince']/text()").extract_first()) + "-" + str(response.xpath("//span[@id='ID_IntegrityMge_ucShow_lbCityNum']/text()").extract_first())
         hainan["address"] = response.xpath("//span[@id='ID_IntegrityMge_ucShow_txtAddress']/text()").extract_first()
         hainan["leal_person"] = response.xpath("//span[@id='ID_IntegrityMge_ucShow_txtLegalPerson']/text()").extract_first()
         hainan["registered_capital"] = response.xpath("//span[@id='ID_IntegrityMge_ucShow_txtRegPrin']/text()").extract_first()
