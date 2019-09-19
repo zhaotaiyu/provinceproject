@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
 import re
-import scrapy
 from scrapy import FormRequest, Request
 from provinceproject.items import *
-import json
-
 
 class QinghaiSpider(scrapy.Spider):
     name = 'qinghai'
@@ -13,12 +10,10 @@ class QinghaiSpider(scrapy.Spider):
     start_urls = ['http://139.170.150.135/dataservice/query/comp/list/SW','http://139.170.150.135/dataservice/query/comp/list/BS']
 
     def parse(self, response):
-        total_page = dict(response.xpath("//a[@sf='pagebar']/@*[name()='sf:data']").extract_first().strip("()")).get("pc")
-        print(total_page)
+        #total_page = dict(response.xpath("//a[@sf='pagebar']/@*[name()='sf:data']").extract_first().strip("()")).get("pc")
+        total_page = int(re.findall(".*?pc:(\d+).*", response.xpath("//a[@sf='pagebar']/@*[name()='sf:data']").extract_first())[0])
         for page in range(1,total_page):
-        #for page in range(5, 10):
-            print("8888888888888888888")
-            print(page)
+        #for page in range(1, 50):
             formdata = {
                 '$total':str(total_page),
                 '$reload':'0',
@@ -30,11 +25,8 @@ class QinghaiSpider(scrapy.Spider):
         mark = response.url.split("/")[-1]
         tr_list = response.xpath("//table[@class='table_box']/tbody/tr")
         for tr in tr_list:
-            try:
-                company_url = "http://139.170.150.135" + tr.xpath("./@onclick").extract_first().split("'")[1]
-                yield Request(company_url,callback=self.parse_company,meta={"mark":mark})
-            except:
-                print(response.text)
+            company_url = "http://139.170.150.135" + tr.xpath("./@onclick").extract_first().split("'")[1]
+            yield Request(company_url,callback=self.parse_company,meta={"mark":mark})
     def parse_company(self,response):
         if response.meta.get("mark") == "BS":
             qinghai = QinghaiItem()
