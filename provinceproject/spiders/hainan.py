@@ -13,12 +13,11 @@ class HainanSpider(scrapy.Spider):
     def parse(self, response):
         print(response.url)
         if response.url == 'http://www.hizj.net:8008/WebSite_Publish/Default.aspx?action=IntegrityMge/ucCreditCompanyInfoListZJ&Type=%E9%80%A0%E4%BB%B7%E5%92%A8%E8%AF%A2%E4%BC%81%E4%B8%9A%E8%B5%84%E8%B4%A8':
-            total_page = int(response.xpath(
-                "//a[@id='ID_IntegrityMge_ucCreditCompanyInfoListZJ_ucPager1_btnLast']/text()").extract_first())
+            total_page = int(response.xpath("//a[@id='ID_IntegrityMge_ucCreditCompanyInfoListZJ_ucPager1_btnLast']/text()").extract_first())
             __VIEWSTATE = response.xpath("//input[@id='__VIEWSTATE']/@value").extract_first()
             __VIEWSTATEGENERATOR = response.xpath("//input[@id='__VIEWSTATEGENERATOR']/@value").extract_first()
-            for page in range(1,total_page):
-            #for page in range(1, 4):
+            #for page in range(1,total_page):
+            for page in range(1, 5):
                 formdata = {
                     '__VIEWSTATE': __VIEWSTATE,
                     '__VIEWSTATEGENERATOR': __VIEWSTATEGENERATOR,
@@ -28,14 +27,13 @@ class HainanSpider(scrapy.Spider):
                     'ID_IntegrityMge_ucCreditCompanyInfoListZJ$ucPager1$txtCurrPage': str(page),
                     'ID_IntegrityMge_ucCreditCompanyInfoListZJ$ucPager1$btnGo': '确定',
                 }
-                yield FormRequest(response.url, formdata=formdata, callback=self.parse_companylist,meta={'dont_redirect':False})
+                yield FormRequest(response.url, formdata=formdata, callback=self.parse_companylist,dont_filter=True,meta={'dont_redirect':True})
         else:
-            total_page = int(response.xpath(
-                "//a[@id='ID_IntegrityMge_ucCreditCompanyInfoList_ucPager1_btnLast']/text()").extract_first())
+            total_page = int(response.xpath("//a[@id='ID_IntegrityMge_ucCreditCompanyInfoList_ucPager1_btnLast']/text()").extract_first())
             __VIEWSTATE = response.xpath("//input[@id='__VIEWSTATE']/@value").extract_first()
             __VIEWSTATEGENERATOR = response.xpath("//input[@id='__VIEWSTATEGENERATOR']/@value").extract_first()
             for page in range(1,total_page):
-            #for page in range(1, 4):
+            #for page in range(1, 5):
                 formdata = {
                     '__VIEWSTATE':__VIEWSTATE,
                     '__VIEWSTATEGENERATOR': __VIEWSTATEGENERATOR,
@@ -45,18 +43,18 @@ class HainanSpider(scrapy.Spider):
                     'ID_IntegrityMge_ucCreditCompanyInfoList$ucPager1$txtCurrPage': str(page),
                     'ID_IntegrityMge_ucCreditCompanyInfoList$ucPager1$btnGo': '确定',
                 }
-                yield FormRequest(response.url,formdata=formdata,callback=self.parse_companylist,meta={'dont_redirect':False})
+                yield FormRequest(response.url,formdata=formdata,callback=self.parse_companylist,dont_filter=True,meta={'dont_redirect':True})
     def parse_companylist(self,response):
         if response.url == 'http://www.hizj.net:8008/WebSite_Publish/Default.aspx?action=IntegrityMge/ucCreditCompanyInfoListZJ&Type=%E9%80%A0%E4%BB%B7%E5%92%A8%E8%AF%A2%E4%BC%81%E4%B8%9A%E8%B5%84%E8%B4%A8':
             tr_list = response.xpath("//table[@id='ID_IntegrityMge_ucCreditCompanyInfoListZJ_gridView']/tr")
             for tr in tr_list[1:]:
                 company_url = "http://www.hizj.net:8008/WebSite_Publish/" + tr.xpath("./td[2]/a/@href").extract_first()
-                yield Request(company_url, callback=self.parse_zjzxcompany,meta={'dont_redirect':False})
+                yield Request(company_url, callback=self.parse_zjzxcompany,dont_filter=True,meta={'dont_redirect':True})
         else:
             tr_list = response.xpath("//table[@id='ID_IntegrityMge_ucCreditCompanyInfoList_gridView']/tr")
             for tr in tr_list[1:]:
                 company_url = "http://www.hizj.net:8008/WebSite_Publish/" + tr.xpath("./td[2]/a/@href").extract_first()
-                yield Request(company_url,callback=self.parse_company,meta={'dont_redirect':False})
+                yield Request(company_url,callback=self.parse_company,dont_filter=True,meta={'dont_redirect':True})
     def parse_company(self,response):
         hainan = HainanItem()
         hainan["id"] = response.url.split("=")[-1]

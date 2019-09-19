@@ -9,7 +9,7 @@ from scrapy import signals
 import random
 import base64
 
-class MyUseragent():
+class MyUseragent(object):
     def process_request(self,request,spider):
         USER_AGENT_LIST = [
         'MSIE (MSIE 6.0; X11; Linux; i686) Opera 7.23',
@@ -27,7 +27,7 @@ class MyUseragent():
         agent = random.choice(USER_AGENT_LIST)
         request.headers['User_Agent'] =agent
 
-class AbuyunProxyMiddleware():
+class AbuyunProxyMiddleware(object):
     def __init__(self,proxyuser,proxypass,proxyserver):
         self.proxyuser = proxyuser
         self.proxypass = proxypass
