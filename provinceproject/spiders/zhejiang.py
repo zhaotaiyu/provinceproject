@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import scrapy
+
 from scrapy import Request,FormRequest
 from provinceproject.items import *
 import datetime
@@ -9,7 +9,6 @@ class ZhejiangSpider(scrapy.Spider):
 	name = 'zhejiang'
 	#allowed_domains = ['115.29.2.37:8080/enterprise.php']
 	start_urls = ['http://223.4.65.131:8080/enterprise_ajax.php']
-
 	def parse(self, response):
 		tr_list=response.xpath("//table[@class='t1']/tr[@class='auto_h']")
 		for tr in tr_list:
@@ -27,6 +26,8 @@ class ZhejiangSpider(scrapy.Spider):
 				'page': alt
 			}
 			yield FormRequest(response.url,formdata=formdata,callback=self.parse)
+
+
 	def parse_company(self,response):
 		#http://115.29.2.37:8080/enterprise_detail.php?CORPCODE=56605492-1&SCUCode=91330105566054921P 无资质
 		zhejiang = ZhejiangItem()
