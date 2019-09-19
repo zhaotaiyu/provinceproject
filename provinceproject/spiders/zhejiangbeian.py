@@ -13,7 +13,7 @@ class ZhejiangbeianSpider(scrapy.Spider):
     #allowed_domains = ['223.4.65.131:8080/jzba.php?p=1']
     start_urls = ['http://223.4.65.131:8080/jzba.php?p=1']
     custom_settings = {
-        'DOWNLOAD_DELAY': '1',
+        'DOWNLOAD_DELAY': '3',
     }
 
     def parse(self, response):
