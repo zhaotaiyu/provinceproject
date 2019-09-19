@@ -11,13 +11,12 @@ class HainanSpider(scrapy.Spider):
     start_urls = ['http://www.hizj.net:8008/WebSite_Publish/Default.aspx?action=IntegrityMge/ucCreditCompanyInfoList&Type=建筑业企业资质','http://www.hizj.net:8008/WebSite_Publish/Default.aspx?action=IntegrityMge/ucCreditCompanyInfoList&Type=工程设计企业资质','http://www.hizj.net:8008/WebSite_Publish/Default.aspx?action=IntegrityMge/ucCreditCompanyInfoList&Type=工程监理企业资质','http://www.hizj.net:8008/WebSite_Publish/Default.aspx?action=IntegrityMge/ucCreditCompanyInfoList&Type=工程勘察企业资质','http://www.hizj.net:8008/WebSite_Publish/Default.aspx?action=IntegrityMge/ucCreditCompanyInfoList&Type=工程招标代理机构资质','http://www.hizj.net:8008/WebSite_Publish/Default.aspx?action=IntegrityMge/ucCreditCompanyInfoListZJ&Type=造价咨询企业资质']
 
     def parse(self, response):
-        print(response.url)
         if response.url == 'http://www.hizj.net:8008/WebSite_Publish/Default.aspx?action=IntegrityMge/ucCreditCompanyInfoListZJ&Type=%E9%80%A0%E4%BB%B7%E5%92%A8%E8%AF%A2%E4%BC%81%E4%B8%9A%E8%B5%84%E8%B4%A8':
             total_page = int(response.xpath("//a[@id='ID_IntegrityMge_ucCreditCompanyInfoListZJ_ucPager1_btnLast']/text()").extract_first())
             __VIEWSTATE = response.xpath("//input[@id='__VIEWSTATE']/@value").extract_first()
             __VIEWSTATEGENERATOR = response.xpath("//input[@id='__VIEWSTATEGENERATOR']/@value").extract_first()
-            #for page in range(1,total_page):
-            for page in range(1, 5):
+            for page in range(1,total_page):
+            #for page in range(1, 5):
                 formdata = {
                     '__VIEWSTATE': __VIEWSTATE,
                     '__VIEWSTATEGENERATOR': __VIEWSTATEGENERATOR,

@@ -52,7 +52,7 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'provinceproject.middlewares.MyUseragent': 543,
+   # 'provinceproject.middlewares.MyUseragent': 543,
    # 'provinceproject.middlewares.AbuyunProxyMiddleware': 542,
 }
 
@@ -101,7 +101,7 @@ PGSQL_PORT=54321
 
 #SCRAPY配置
 DOWNLOAD_TIMEOUT=100
-RETRY_HTTP_CODES = [302,500, 502, 503, 504, 400, 403, 408, 429, 407]
+RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 403, 408, 429, 407]
 RETRY_TIMES = 10
 HTTPERROR_ALLOWED_CODES = [302,301,503,400]
 #abuyun代理配置

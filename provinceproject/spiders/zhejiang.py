@@ -8,7 +8,7 @@ import re
 class ZhejiangSpider(scrapy.Spider):
 	name = 'zhejiang'
 	#allowed_domains = ['115.29.2.37:8080/enterprise.php']
-	start_urls = ['http://115.29.2.37:8080/enterprise_ajax.php']
+	start_urls = ['http://223.4.65.131:8080/enterprise_ajax.php']
 
 	def parse(self, response):
 		tr_list=response.xpath("//table[@class='t1']/tr[@class='auto_h']")
@@ -16,23 +16,16 @@ class ZhejiangSpider(scrapy.Spider):
 			company_url=tr.xpath("./td[2]/div/a/@href").extract_first()
 			msg = tr.xpath("./td[4]/div/text()").extract_first()
 			if company_url:
-				company_url="http://115.29.2.37:8080/"+company_url
-				yield Request(company_url,callback=self.parse_company,meta={"msg":msg})
-			else:
-				stop=input("未发送公司请求")
-		try:	
-			total_page=int(response.xpath("//span[@class='vcountPage']/text()").extract_first())
-			now_page = int(response.xpath("//span[@class='vpage']/text()").extract_first())
-		except:
-			print(response.text)
-			stop=input("*****************")
+				company_url="http://223.4.65.131:8080/"+company_url
+				#company_url="http://223.4.65.131:8080/enterprise_detail.php?CORPCODE=68293005-2&SCUCode=91330106682930052T"
+				yield Request(company_url,callback=self.parse_company,meta={"msg":msg,"dont_redirect":True})
+		total_page=int(response.xpath("//span[@class='vcountPage']/text()").extract_first())
+		now_page = int(response.xpath("//span[@class='vpage']/text()").extract_first())
 		if now_page<=total_page:
-			print(now_page)
 			alt = response.xpath("//div[@id='pagebar']/ul/li[3]/@alt").extract_first()
 			formdata={
 				'page': alt
 			}
-			print(alt)
 			yield FormRequest(response.url,formdata=formdata,callback=self.parse)
 	def parse_company(self,response):
 		#http://115.29.2.37:8080/enterprise_detail.php?CORPCODE=56605492-1&SCUCode=91330105566054921P 无资质
@@ -62,9 +55,9 @@ class ZhejiangSpider(scrapy.Spider):
 		zhejiang["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 		zhejiang["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 		zhejiang["is_delete"] = 0
-		if (response.meta.get("msg")).isspace() ==False:
-			aptitude_url = "http://115.29.2.37:8080/ajax_.php?page=1&"+response.url.split("?")[-1]
-			yield Request(aptitude_url,callback=self.parse_aptitude,meta={"zhejiang":zhejiang})
+		if (response.meta.get("msg")).isspace() is False:
+			aptitude_url = "http://223.4.65.131:8080//ajax_.php?page=1&"+response.url.split("?")[-1]
+			yield Request(aptitude_url,callback=self.parse_aptitude,meta={"zhejiang":zhejiang,"dont_redirect":True})
 		else:
 			yield zhejiang
 	def parse_aptitude(self,response):
