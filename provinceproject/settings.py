@@ -52,8 +52,9 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'provinceproject.middlewares.MyUseragent': 543,
-   # 'provinceproject.middlewares.AbuyunProxyMiddleware': 542,
+   'provinceproject.middlewares.MyUseragent': 542,
+   #'provinceproject.middlewares.AbuyunProxyMiddleware': 543,
+   #'provinceproject.middlewares.KuaidailiMiddleware': 544,
 }
 
 # Enable or disable extensions
@@ -103,12 +104,15 @@ PGSQL_PORT=54321
 DOWNLOAD_TIMEOUT=100
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 403, 408, 429, 407]
 RETRY_TIMES = 10
-HTTPERROR_ALLOWED_CODES = [302,301,503,400]
+HTTPERROR_ALLOWED_CODES = [302,301,503,400,429]
 #abuyun代理配置
-PROXYUSER="H7895G9300YN511D"
-PROXYPASS="AC67F9AA92D6F49F"
+PROXYUSER="HKB7XCN8AV20UJZD"
+PROXYPASS="177A2E10EE78A181"
 PROXYSERVER="http://http-dyn.abuyun.com:9020"
 #MONGO配置
 MONGOCLIENT='mongodb://ecs-a025-0002:27017/'
 MONGODATABASE='error'
 MONGOTABLE='province'
+#快代理配置
+KUAI_USERNAME="zhao_tai_yu"
+KUAI_PASSWORD="7av2i9t5"

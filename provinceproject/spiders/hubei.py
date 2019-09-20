@@ -7,7 +7,7 @@ from provinceproject.items import *
 class HubeiSpider(scrapy.Spider):
     name = 'hubei'
     #allowed_domains = ['59.175.169.110/ewmwz/qymanage/qyzzsearch.aspx?ssl=109']
-    start_urls = ['http://59.175.169.110/ewmwz/qymanage/qyzzsearch.aspx?ssl=109']
+    start_urls = ['http://jg.hbcic.net.cn/web/QyManage/QyList.aspx']
     def parse(self, response):
         total_page = response.xpath("//span[@id='labPageCount']/text()").extract_first()
         __VIEWSTATE=response.xpath("//input[@id='__VIEWSTATE']/@value").extract_first()
@@ -18,7 +18,6 @@ class HubeiSpider(scrapy.Spider):
                 '__EVENTVALIDATION': __EVENTVALIDATION,
                 '__VIEWSTATE':__VIEWSTATE,
                 'txtPageIndex': str(page),
-                'hSsl': '109',
             }
             yield scrapy.FormRequest(url=response.url,formdata=formdata,callback=self.parse_companylist)
     def parse_companylist(self,response):
@@ -26,11 +25,11 @@ class HubeiSpider(scrapy.Spider):
         for tr in tr_list[1:-1]:
             company_url=tr.xpath("./td[2]/a/@href").extract_first()
             if company_url:
-                company_url="http://59.175.169.110/ewmwz/qymanage/"+company_url
+                company_url="http://jg.hbcic.net.cn/web/QyManage/"+company_url
                 yield Request(company_url,callback=self.parse_company)
     def parse_company(self,response):
         hubei=HubeiItem()
-        hubei["id"] = response.url.split("?")[-1]
+        hubei["id"] = response.url.split("=")[-1]
         hubei["name"] = str(response.xpath("//form[@id='form1']/table/tr/td/table/tr[7]/td/table/tr[2]/td[2]/text()").extract_first()).strip()
         hubei["reg_address"] = str(response.xpath("//form[@id='form1']/table/tr/td/table/tr[7]/td/table/tr[3]/td[2]/text()").extract_first()).strip()
         hubei["social_credit_code"] = str(response.xpath("//form[@id='form1']/table/tr/td/table/tr[7]/td/table/tr[4]/td[2]/text()").extract_first()).strip()

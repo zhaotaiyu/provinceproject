@@ -10,25 +10,26 @@ class HunanSpider(scrapy.Spider):
 	start_urls = ['http://gcxm.hunanjs.gov.cn/AjaxHandler/PersonHandler.ashx?method=GetListPage&type=1&corptype_1=&corpname_1=&licensenum_1=&Province_1=430000&City_1=&county_1=&persontype=&persontype_2=&personname_2=&idcard_2=&certnum_2=&corpname_2=&prjname_3=&corpname_3=&prjtype_3=&cityname_3=&year_4=&jidu_4=&corpname_4=&corpname_5=&corpcode_5=&legalman_5=&cityname_5=&SafeNum_6=&corpname_6=&pageSize=30&pageIndex=1','http://gcxm.hunanjs.gov.cn/AjaxHandler/PersonHandler.ashx?method=GetListPage&type=5&corptype_1=&corpname_1=&licensenum_1=&Province_1=430000&City_1=&county_1=&persontype=&persontype_2=&personname_2=&idcard_2=&certnum_2=&corpname_2=&prjname_3=&corpname_3=&prjtype_3=&cityname_3=&year_4=2019&jidu_4=2&corpname_4=&corpname_5=&corpcode_5=&legalman_5=&cityname_5=&SafeNum_6=&corpname_6=&pageSize=30&pageIndex=1']
 
 	def parse(self, response):
-		ty = response.url.split("&")[1]
 		if json.loads(response.text).get("success"):
-			if not response.meta.get("msg") or response.url.split("=")[-1]!="1":
-				total_page = json.loads(response.text).get("data").get("pages")
-				for page in range(2,int(total_page)+1):
-					url="http://gcxm.hunanjs.gov.cn/AjaxHandler/PersonHandler.ashx?method=GetListPage&type=1&corptype_1=&corpname_1=&licensenum_1=&Province_1=430000&City_1=&county_1=&persontype=&persontype_2=&personname_2=&idcard_2=&certnum_2=&corpname_2=&prjname_3=&corpname_3=&prjtype_3=&cityname_3=&year_4=&jidu_4=&corpname_4=&corpname_5=&corpcode_5=&legalman_5=&cityname_5=&SafeNum_6=&corpname_6=&pageSize=30&pageIndex={}".format(page)
-					yield Request(url,callback=self.parse)
-
-			list = json.loads(response.text).get("data").get("list")
-			if ty =="type=1":
-				for li in list:
-					company_url = "http://gcxm.hunanjs.gov.cn/AjaxHandler/PersonHandler.ashx?method=getCorpDetail&corpid={}&isout=".format(li.get("corpid"))
-					yield Request(company_url,callback=self.parse_company,meta={"corpid":li.get("corpid"),"ty":ty})
-			if ty == "type=5":
-				for li in list:
-					company_url = "http://gcxm.hunanjs.gov.cn/AjaxHandler/PersonHandler.ashx?method=getCorpDetail&corpid={}&isout=1".format(li.get("corpid"))
-					yield Request(company_url,callback=self.parse_company,meta={"corpid":li.get("corpid"),"ty":ty})
-		else:
-			yield Request(response.url,callback=self.parse,dont_filter=True,meta={"msg":"retry"})
+			total_page = json.loads(response.text).get("data").get("pages")
+			#for page in range(1,int(total_page)+1):
+			for page in range(1, 11):
+				url='='.join(response.url.split("=")[0:-1])+"="+str(page)
+				print(url)
+				yield Request(url,callback=self.parse_companylist,dont_filter=True)
+	def parse_companylist(self,response):
+		ty = response.url.split("&")[1]
+		data_list = json.loads(response.text).get("data").get("list")
+		if ty == "type=1":
+			for li in data_list:
+				company_url = "http://gcxm.hunanjs.gov.cn/AjaxHandler/PersonHandler.ashx?method=getCorpDetail&corpid={}&isout=".format(
+					li.get("corpid"))
+				yield Request(company_url, callback=self.parse_company, meta={"corpid": li.get("corpid"), "ty": ty})
+		if ty == "type=5":
+			for li in data_list:
+				company_url = "http://gcxm.hunanjs.gov.cn/AjaxHandler/PersonHandler.ashx?method=getCorpDetail&corpid={}&isout=1".format(
+					li.get("corpid"))
+				yield Request(company_url, callback=self.parse_company, meta={"corpid": li.get("corpid"), "ty": ty})
 	def parse_company(self,response):
 		ty = response.meta.get("ty")
 		data = json.loads(response.text).get("data")

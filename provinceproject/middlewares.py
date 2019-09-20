@@ -4,11 +4,15 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-
-from scrapy import signals
+import time
+import pymongo
 import random
 import base64
+from .settings import *
+from .utils import fetch_one_proxy
 
+if "provinceproject.middlewares.KuaidailiMiddleware" in DOWNLOADER_MIDDLEWARES:
+    proxy,use_time,get_time = fetch_one_proxy()
 class MyUseragent(object):
     def process_request(self,request,spider):
         USER_AGENT_LIST = [
@@ -43,3 +47,22 @@ class AbuyunProxyMiddleware(object):
             proxypass=crawler.settings.get("PROXYPASS"),
             proxyserver=crawler.settings.get("PROXYSERVER"),
         )
+
+class KuaidailiMiddleware(object):
+    def __init__(self,username,password):
+        self.username=username
+        self.password=password
+    def process_request(self, request, spider):
+        global proxy, use_time, get_time
+        if int(time.time()) - get_time > use_time - 10:
+            proxy, use_time, get_time = fetch_one_proxy()
+        proxy_url = 'http://%s:%s@%s' % (self.username, self.password, proxy)
+        request.meta['proxy'] = proxy_url
+        auth = "Basic %s" % (base64.b64encode(('%s:%s' % (self.username, self.password)).encode('utf-8'))).decode('utf-8')
+        request.headers['Proxy-Authorization'] = auth
+    @classmethod
+    def from_crawler(cls,crawler):
+        return cls(
+            username=crawler.settings.get("KUAI_USERNAME"),
+            password=crawler.settings.get("KUAI_PASSWORD")
+            )
