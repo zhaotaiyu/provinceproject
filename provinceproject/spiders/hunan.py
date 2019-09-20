@@ -12,8 +12,8 @@ class HunanSpider(scrapy.Spider):
 	def parse(self, response):
 		if json.loads(response.text).get("success"):
 			total_page = json.loads(response.text).get("data").get("pages")
-			#for page in range(1,int(total_page)+1):
-			for page in range(1, 11):
+			for page in range(1,int(total_page)+1):
+			#for page in range(1, 11):
 				url='='.join(response.url.split("=")[0:-1])+"="+str(page)
 				print(url)
 				yield Request(url,callback=self.parse_companylist,dont_filter=True)
