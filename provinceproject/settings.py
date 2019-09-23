@@ -27,7 +27,7 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+#DOWNLOAD_DELAY = 0.5
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -106,8 +106,8 @@ RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 403, 408, 429, 407]
 RETRY_TIMES = 10
 HTTPERROR_ALLOWED_CODES = [302,301,503,400,429]
 #abuyun代理配置
-PROXYUSER="HKB7XCN8AV20UJZD"
-PROXYPASS="177A2E10EE78A181"
+PROXYUSER="HR58I089C2G8N57D"
+PROXYPASS="3EB3D83115080960"
 PROXYSERVER="http://http-dyn.abuyun.com:9020"
 #MONGO配置
 MONGOCLIENT='mongodb://ecs-a025-0002:27017/'

@@ -7,26 +7,39 @@ import datetime
 
 class AnhuiSpider(scrapy.Spider):
 	name = 'anhui'
+	custom_settings = {
+		'DOWNLOAD_DELAY': '0.5',
+		'DOWNLOADER_MIDDLEWARES': {'provinceproject.middlewares.AbuyunProxyMiddleware': 543, }
+	}
 	#allowed_domains = ['dohurd.ah.gov.cn/ahzjt_Front/']
-	start_urls = ['http://dohurd.ah.gov.cn/ahzjt_Front']
+	def start_requests(self):
+		url = "http://61.190.70.122:8003/epoint-mini/rest/function/searchSNQY"
+		formdata = {
+			'pagesize': '12',
+			'pageindex': '1',
+			'type': '2',
+			'txt1': '',
+			'CorpCode': '',
+			'CorpName': '',
+			'LegalMan': '',
+			'CertTypeNum': '',
+			'AreaCode': '',
+		}
+		yield FormRequest(url, formdata=formdata, callback=self.parse)
 
 	def parse(self, response):
-		try:
-			data = json.loads(response.text).get("all")
-			pageindex = int(data.get("pageindex",0))
-			total_page = int(data.get("total",0))
-			listinfo = data.get("listinfo")
-			for info in listinfo:
-				rowguid = info.get("rowguid")
-				company_url = "http://dohurd.ah.gov.cn/epoint-mini/rest/function/searchQYXQYM"
-				c_formdata = {
-					'rowguid': rowguid
-				}
-				yield FormRequest(company_url,formdata = c_formdata,callback = self.parse_company,meta = {"rowguid":rowguid})
-		except:
-			pageindex = 0
-			total_page = 2
-		if pageindex < total_page:
+		data = json.loads(response.text).get("all")
+		pageindex = int(data.get("pageindex",0))
+		total = int(data.get("total",2))
+		listinfo = data.get("listinfo")
+		for info in listinfo:
+			rowguid = info.get("rowguid")
+			company_url = "http://dohurd.ah.gov.cn/epoint-mini/rest/function/searchQYXQYM"
+			c_formdata = {
+				'rowguid': rowguid
+			}
+			yield FormRequest(company_url,formdata = c_formdata,callback = self.parse_company,meta = {"rowguid":rowguid})
+		if pageindex * 12 < total:
 			url = "http://61.190.70.122:8003/epoint-mini/rest/function/searchSNQY"
 			formdata = {
 				'pagesize': '12',
