@@ -7,14 +7,14 @@ from scrapy import FormRequest,Request
 class NeimengguSpider(scrapy.Spider):
     name = 'neimenggu'
     #allowed_domains = ['110.16.70.26/nmjgpublisher/corpinfo/CorpInfoObtain.aspx']
-    start_urls = ['http://110.16.70.26/nmjgpublisher/corpinfo/CorpInfoObtain.aspx/']
+    start_urls = ['http://110.16.70.26/nmjgpublisher/corpinfo/CorpInfoObtain.aspx']
     def parse(self, response):
         for page in range(1,39):
             url="http://110.16.70.26/nmjgpublisher/handle/ProjectsInfoHandler.ashx?type=CorpInfo&lblPageCount=38&lblPageIndex={}&lblRowsCount=757&lblPageSize=20&SFZBDL=&CorpName=&Zzlx=&CertNum=&City=&_=1565252583301".format(str(page))
-            #yield Request(url,callback=self.parse_conmanylist)
+            yield Request(url,callback=self.parse_conmanylist)
         #备案
         beian_url="http://110.16.70.26/nmjgpublisher/handle/ProjectsInfoHandler.ashx?type=CorpInfoQW&SFZBDL=&CorpName=&Zzlx=&CertNum=&City=&nPageIndex=1&nPageCount=0&nPageRowsCount=0&nPageSize=20"
-        yield Request(beian_url,callback=self.parse_beiancompanylist)
+        #yield Request(beian_url,callback=self.parse_beiancompanylist)
     def parse_conmanylist(self,response):
         tb=json.loads(response.text).get("tb")
         tree=etree.HTML(tb)

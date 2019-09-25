@@ -27,21 +27,18 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 0.5
+DOWNLOAD_DELAY = 0.3
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = True
+# COOKIES_ENABLED = True
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-# DEFAULT_REQUEST_HEADERS = {
-#
-# }
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
@@ -52,7 +49,7 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'provinceproject.middlewares.MyUseragent': 542,
+   #'provinceproject.middlewares.MyUseragent': 542,
    #'provinceproject.middlewares.AbuyunProxyMiddleware': 543,
    #'provinceproject.middlewares.KuaidailiMiddleware': 544,
 }
@@ -65,11 +62,11 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#     #'provinceproject.pipelines.CeshiPipeline': 209,
-#     'provinceproject.pipelines.ProvinceprojectPipeline': 300,
-#     'provinceproject.pipelines.PgsqlPipeline': 301,
-# }
+ITEM_PIPELINES = {
+    #'provinceproject.pipelines.CeshiPipeline': 209,
+    'provinceproject.pipelines.ProvinceprojectPipeline': 300,
+    'provinceproject.pipelines.PgsqlPipeline': 301,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -101,7 +98,7 @@ PGSQL_USER="postgres"
 PGSQL_PORT=54321
 
 #SCRAPY配置
-DOWNLOAD_TIMEOUT=100
+#DOWNLOAD_TIMEOUT=100
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 403, 408, 429, 407]
 RETRY_TIMES = 10
 HTTPERROR_ALLOWED_CODES = [302,301,503,400,429]

@@ -6,6 +6,10 @@ import datetime
 
 class BeijingSpider(scrapy.Spider):
 	name = 'beijing'
+	custom_settings = {
+		'DOWNLOAD_DELAY': '0.5',
+		# 'DOWNLOADER_MIDDLEWARES' : {'provinceproject.middlewares.AbuyunProxyMiddleware': 543}
+	}
 	#allowed_domains = ['www.bjjs.gov.cn/eportal/ui?pageId=307900']
 	start_urls = ['http://zjw.beijing.gov.cn/eportal/ui?pageId=307900']
 
@@ -21,7 +25,7 @@ class BeijingSpider(scrapy.Spider):
 	def parse_companylist(self,response):
 		tr_list=response.xpath("//table[@id='tab_view']/tbody/tr")
 		if tr_list:
-			for tr in tr_list[1::]:
+			for tr in tr_list[1:]:
 				company_url = tr.xpath("./td[3]/a/@href").extract_first()
 				if company_url:
 					company_url="http://zjw.beijing.gov.cn"+company_url

@@ -1,30 +1,50 @@
 # -*- coding: utf-8 -*-
 import datetime
+import json
+
 import scrapy
 from scrapy import FormRequest,Request
 from provinceproject.items import *
 class GuangxiSpider(scrapy.Spider):
     name = 'guangxi'
+    custom_settings = {
+        'DOWNLOAD_DELAY' : '1',
+        #'DOWNLOADER_MIDDLEWARES' : {'provinceproject.middlewares.AbuyunProxyMiddleware': 543}
+    }
     #allowed_domains = ['dn4.gxzjt.gov.cn:1141/WebInfo/Enterprise/Enterprise.aspx']
-    start_urls = ['http://dn4.gxzjt.gov.cn:1141/WebInfo/Enterprise/Enterprise.aspx/']
+    start_urls = ['http://dn4.gxzjt.gov.cn:1141/WebInfo/Enterprise/Enterprise.aspx']
 
     def parse(self, response):
         url="http://dn4.gxzjt.gov.cn:1141/WebInfo/Enterprise/Enterprise.aspx"
         total_page=response.xpath("//div[@id='ContentPlaceHolder1_List_Pager']/table/tr/td/text()").extract_first()
+        print(response.request.headers)
+        print(type(response.request.headers.__repr__()))
+        print(response.headers)
+
         if total_page:
             total_page=total_page.split("页")[0].split("/")[-1]
             __VIEWSTATE=response.xpath("//input[@id='__VIEWSTATE']/@value").extract_first()
             __VIEWSTATEGENERATOR=response.xpath("//input[@id='__VIEWSTATEGENERATOR']/@value").extract_first()
             __EVENTVALIDATION=response.xpath("//input[@id='__EVENTVALIDATION']/@value").extract_first()
-            for page in range(1,int(total_page)+1):
-                formdata={
-                    '__VIEWSTATE':__VIEWSTATE,
-                    '__VIEWSTATEGENERATOR':__VIEWSTATEGENERATOR,
-                    '__EVENTTARGET':'ctl00$ctl00$ContentPlaceHolder1$List$Pager',
-                    '__EVENTVALIDATION':__EVENTVALIDATION,
-                    '__EVENTARGUMENT':str(page)
-                }
-                yield FormRequest(url,formdata=formdata,callback=self.parse_company_list)
+            __CSRFTOKEN=response.xpath("//input[@id='__CSRFTOKEN']/@value").extract_first()
+            __EVENTTARGET=response.xpath("//input[@id='__EVENTTARGET']/@value").extract_first()
+            #for page in range(1,int(total_page)+1):
+            # for page in range(1, 2):
+            #     formdata={
+            #         '__CSRFTOKEN': __CSRFTOKEN,
+            #         '__VIEWSTATE': __VIEWSTATE,
+            #         '__VIEWSTATEGENERATOR': __VIEWSTATEGENERATOR,
+            #         '__EVENTTARGET': 'ctl00$ctl00$ContentPlaceHolder1$List$Pager',
+            #         '__EVENTARGUMENT': str(page),
+            #         '__EVENTVALIDATION': __EVENTVALIDATION,
+            #         'ctl00$ctl00$ContentPlaceHolder1$Search$DanWeiName': '',
+            #         'ctl00$ctl00$ContentPlaceHolder1$Search$DanWeiType': '',
+            #         'ctl00$ctl00$ContentPlaceHolder1$Search$ZiZhiNum': '',
+            #         'ctl00$ctl00$ContentPlaceHolder1$Search$CityNum': '',
+            #         'ctl00$ctl00$ContentPlaceHolder1$Search$ZiZhiEndDate': ''
+            #     }
+            #     yield FormRequest(url,formdata=formdata,callback=self.parse_company_list)
+
     def parse_company_list(self,response):
         tr_list=response.xpath("//table[@id='ContentPlaceHolder1_List_Datagrid1']/tr")
         if tr_list:
