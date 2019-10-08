@@ -7,6 +7,10 @@ from provinceproject.items import *
 #陕西
 class Shanxi3Spider(scrapy.Spider):
     name = 'shanxi3'
+    custom_settings = {
+        'DOWNLOAD_DELAY': '0.1',
+        # 'DOWNLOADER_MIDDLEWARES': {'provinceproject.middlewares.AbuyunProxyMiddleware': 543, }
+    }
     #allowed_domains = ['www.shaanxijs.gov.cn:9010/SxApp/Share/Web/SgqyList.aspx']
     start_urls = ['http://www.shaanxijs.gov.cn:9010/SxApp/Share/Web/SgqyList.aspx/']
     def parse(self, response):
@@ -37,21 +41,24 @@ class Shanxi3Spider(scrapy.Spider):
                     company_url="http://www.shaanxijs.gov.cn:9010/SxApp/Share/Web/"+company_url
                     yield Request(company_url,callback=self.parse_company)
     def parse_company(self,response):
-        shanxi3=Shanxi3Item()
-        shanxi3["id"] =response.url.split("=")[-1]
-        shanxi3["name"] =response.xpath("//table[@class='m_table']/tr[1]/td[2]/span/text()").extract_first()
-        shanxi3["lic_accept_date"] =response.xpath("//table[@class='m_table']/tr[2]/td[2]/span/text()").extract_first()
-        shanxi3["aptitude_type"] =response.xpath("//table[@class='m_table']/tr[3]/td[2]/span/text()").extract_first()
-        shanxi3["social_credit_code"] =response.xpath("//table[@class='m_table']/tr[4]/td[2]/span/text()").extract_first()
-        shanxi3["reg_address"] =response.xpath("//table[@class='m_table']/tr[5]/td[2]/span/text()").extract_first()
-        shanxi3["lic_num"] =response.xpath("//table[@class='m_table']/tr[1]/td[4]/span/text()").extract_first()
-        shanxi3["lic_useful_date"] =response.xpath("//table[@class='m_table']/tr[2]/td[4]/span/text()").extract_first()
-        shanxi3["leal_person"] =response.xpath("//table[@class='m_table']/tr[4]/td[4]/span/text()").extract_first()
-        shanxi3["url"] =response.url
-        shanxi3["create_time"] =datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        shanxi3["modification_time"] =datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        shanxi3["is_delete"] =0
-        yield shanxi3
+        c_info = CompanyInfomortation()
+        c_info["province_company_id"] ="shanxi3_" + response.url.split("=")[-1]
+        c_info["company_name"] =response.xpath("//table[@class='m_table']/tr[1]/td[2]/span/text()").extract_first()
+        c_info["leal_person"] = response.xpath("//table[@class='m_table']/tr[4]/td[4]/span/text()").extract_first()
+        c_info["social_credit_code"] = response.xpath("//table[@class='m_table']/tr[4]/td[2]/span/text()").extract_first()
+        c_info["regis_address"] = response.xpath("//table[@class='m_table']/tr[5]/td[2]/span/text()").extract_first()
+        c_info["url"] = response.url
+        c_info["source"] = "陕西"
+        yield c_info
+        c_apt = CompanyaptitudeItem()
+        c_apt["province_company_id"] = c_info["province_company_id"]
+        c_apt["company_name"] = c_info["company_name"]
+        c_apt["aptitude_startime"] =response.xpath("//table[@class='m_table']/tr[2]/td[2]/span/text()").extract_first()
+        c_apt["aptitude_name"] =response.xpath("//table[@class='m_table']/tr[3]/td[2]/span/text()").extract_first()
+        c_apt["aptitude_id"] =response.xpath("//table[@class='m_table']/tr[1]/td[4]/span/text()").extract_first()
+        c_apt["aptitude_endtime"] =response.xpath("//table[@class='m_table']/tr[2]/td[4]/span/text()").extract_first()
+        c_apt["source"] = "陕西"
+        yield c_apt
 
 
 

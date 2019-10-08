@@ -7,7 +7,7 @@ import datetime
 class HunanSpider(scrapy.Spider):
 	name = 'hunan'
 	custom_settings = {
-		'DOWNLOAD_DELAY': '0.5',
+		'DOWNLOAD_DELAY': '1',
 		'DOWNLOADER_MIDDLEWARES': {'provinceproject.middlewares.AbuyunProxyMiddleware': 543, }
 	}
 	#allowed_domains = ['gcxm.hunanjs.gov.cn/dataservice.html?queryType=0']
@@ -19,9 +19,9 @@ class HunanSpider(scrapy.Spider):
 			for page in range(1,int(total_page)+1):
 			#for page in range(1, 11):
 				url='='.join(response.url.split("=")[0:-1])+"="+str(page)
-				yield Request(url,callback=self.parse_companylist,dont_filter=True)
+				yield Request(url,callback=self.parse_companylist,dont_filter=True,meta={'dont_redirect': True})
 		else:
-			yield Request(response.url, callback=self.parse,dont_filter=True)
+			yield Request(response.url, callback=self.parse,dont_filter=True,meta={'dont_redirect': True})
 	def parse_companylist(self,response):
 		ty = response.url.split("&")[1]
 		data_list = json.loads(response.text).get("data").get("list")
@@ -31,64 +31,64 @@ class HunanSpider(scrapy.Spider):
 				for li in data_list:
 					company_url = "http://gcxm.hunanjs.gov.cn/AjaxHandler/PersonHandler.ashx?method=getCorpDetail&corpid={}&isout=".format(
 						li.get("corpid"))
-					yield Request(company_url, callback=self.parse_company, meta={"corpid": li.get("corpid"), "ty": ty})
+					yield Request(company_url, callback=self.parse_company, meta={"corpid": li.get("corpid"), "ty": ty,'dont_redirect': True})
 			if ty == "type=5":
 				for li in data_list:
-					company_url = "http://gcxm.hunanjs.gov.cn/AjaxHandler/PersonHandler.ashx?method=getCorpDetail&corpid={}&isout=1".format(
-						li.get("corpid"))
-					yield Request(company_url, callback=self.parse_company, meta={"corpid": li.get("corpid"), "ty": ty})
+					beian = BeianItem()
+					beian["company_name"] = li.get("corpname")
+					beian["social_credit_code"] = li.get("corpcode")
+					beian["record_province"] = "湖南"
+					yield beian
+					# company_url = "http://gcxm.hunanjs.gov.cn/AjaxHandler/PersonHandler.ashx?method=getCorpDetail&corpid={}&isout=1".format(
+					# 	li.get("corpid"))
+					# yield Request(company_url, callback=self.parse_company, meta={"corpid": li.get("corpid"), "ty": ty})
 		else:
-			yield Request(response.url,callback=self.parse_companylist,dont_filter=True)
+			yield Request(response.url,callback=self.parse_companylist,dont_filter=True,meta={'dont_redirect': True})
 	def parse_company(self,response):
 		mark = json.loads(response.text).get("success")
 		if mark:
 			ty = response.meta.get("ty")
 			data = json.loads(response.text).get("data")
 			ds_list = data.get("ds")
-			if ty =="type=1":
-				for ds in ds_list:
-					hunan = HunanItem()
-					hunan["id"] = response.meta.get("corpid")
-					hunan["name"] = ds.get("corpname")
-					hunan["social_credit_code"] = ds.get("corpcode")
-					hunan["leal_person"] = ds.get("legalman")
-					hunan["regis_type"] = ds.get("econtypename")
-					hunan["reg_address"] = ds.get("county")
-					hunan["address"] = ds.get("address")
-					hunan["url"] = response.url
-					hunan["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-					hunan["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-					hunan["is_delete"] = 0
-					ds1_list = data.get("ds1")
-					if ds1_list:
-						for ds1 in ds1_list:
-							hunan["aptitude_type"] = ds1.get("aptitudekindname")
-							hunan["aptitude_num"] = ds1.get("certid")
-							hunan["aptitude_range"] = ds1.get("mark")
-							hunan["aptitude_accept_date"] = ds1.get("organdate")
-							if hunan["aptitude_accept_date"]:
-								hunan["aptitude_accept_date"] = hunan["aptitude_accept_date"].strip("T00:00:00")
-							hunan["aptitude_useful_date"] = ds1.get("enddate")
-							if hunan["aptitude_useful_date"]:
-								hunan["aptitude_useful_date"] = hunan["aptitude_useful_date"].strip("T00:00:00")
-							hunan["aptitude_organ"] = ds1.get("organname")
-							yield hunan
-					else:
-						yield hunan
-			if ty =="type=5":
-				for ds in ds_list:
-					beian = BeianItem()
-					beian["corpname"] = ds.get("corpname")
-					beian["corpcode"] = ds.get("corpcode")
-					beian["legalman"] = ds.get("legalman")
-					beian["danweitype"] = ds.get("econtypename")
-					beian["areaname"] = ds.get("county")
-					beian["address"] = ds.get("address")
-					beian["record_province"] = "湖南"
-					beian["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-					beian["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-					beian["is_delete"] = 0
-					yield beian
+			# if ty =="type=1":
+			for ds in ds_list[0:1]:
+				c_info = CompanyInfomortation()
+				c_info["province_company_id"] = "hunan_" + str(response.meta.get("corpid"))
+				c_info["company_name"] = ds.get("corpname")
+				c_info["social_credit_code"] = ds.get("corpcode")
+				c_info["leal_person"] = ds.get("legalman")
+				c_info["regis_type"] = ds.get("econtypename")
+				c_info["regis_address"] = ds.get("county")
+				c_info["business_address"] = ds.get("address")
+				c_info["url"] = response.url
+				c_info["source"] = "湖南"
+				yield c_info
+				ds1_list = data.get("ds1")
+				if ds1_list:
+					for ds1 in ds1_list:
+						c_apt = CompanyaptitudeItem()
+						c_apt["province_company_id"] = c_info["province_company_id"]
+						c_apt["company_name"] = c_info["company_name"]
+						c_apt["source"] = "湖南"
+						c_apt["aptitude_type"] = ds1.get("aptitudekindname")
+						c_apt["aptitude_id"] = ds1.get("certid")
+						c_apt["aptitude_name"] = ds1.get("mark")
+						c_apt["aptitude_startime"] = ds1.get("organdate")
+						c_apt["aptitude_endtime"] = ds1.get("enddate")
+						if c_apt["aptitude_startime"]:
+							c_apt["aptitude_startime"] = c_apt["aptitude_startime"].strip("T00:00:00")
+							c_apt["aptitude_endtime"] = ds1.get("enddate")
+						if c_apt["aptitude_endtime"]:
+							c_apt["aptitude_endtime"] = c_apt["aptitude_endtime"].strip("T00:00:00")
+							c_apt["aptitude_organ"] = ds1.get("organname")
+						yield c_apt
+			# if ty =="type=5":
+			# 	for ds in ds_list:
+			# 		beian = BeianItem()
+			# 		beian["company_name"] = ds.get("corpname")
+			# 		beian["social_credit_code"] = ds.get("corpcode")
+			# 		beian["record_province"] = "湖南"
+			# 		yield beian
 		else:
 			yield Request(response.url, callback=self.parse_company, dont_filter=True)
 

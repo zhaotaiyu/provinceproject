@@ -26,29 +26,11 @@ class HenanbeianSpider(scrapy.Spider):
 	def parse_companylist(self,response):
 		tr_list = response.xpath("//table[@id='ContentPlaceHolder1_GridView2']/tbody/tr")
 		for tr in tr_list[1:-1]:
-			corpname = tr.xpath("./td[2]/a/@href").extract_first().split("=")[-2].split("&")[0]
-			corpcode = tr.xpath("./td[2]/a/@href").extract_first().split("=")[-1]
-			company_url = "http://hngcjs.hnjs.gov.cn/SiKuWeb/WSRY_Detail.aspx?QiYeMingCheng={}&TongYiSheHuiXinYongDaiMa={}".format(corpname,corpcode)
-			if corpcode:
-				yield Request(company_url,callback=self.parse_company,meta={"CorpCode":corpcode,"CorpName":corpname})
-			else:
-				print(corpname)
-				print(corpcode)
-				stop = input("===============")
+			beian = BeianItem()
+			beian["social_credit_code"] = tr.xpath("./td[2]/a/@href").extract_first().split("=")[-1]
+			beian["company_name"] = tr.xpath("./td[2]/a/@href").extract_first().split("=")[-2].split("&")[0]
+			beian["record_province"] = "河南"
+			yield beian
 
-	def parse_company(self,response):
-		beian = BeianItem()
-		beian["corpcode"] = response.meta.get("CorpCode")
-		beian ["corpname"] = response.meta.get("CorpName")
-		beian["areaname"] = str(response.xpath("//table[@class='Tab']/tr[4]/td[2]/span/text()").extract_first()).strip()
-		beian["regprin"] = str(response.xpath("//table[@class='Tab']/tr[4]/td[4]/span/text()").extract_first()).strip()
-		beian["legalman"] = str(response.xpath("//table[@class='Tab']/tr[3]/td[2]/span/text()").extract_first()).strip()
-		beian["economicnum"] = str(response.xpath("//table[@class='Tab']/tr[3]/td[4]/span/text()").extract_first()).strip()
-		beian["address"] = str(response.xpath("//table[@class='Tab']/tr[5]/td[2]/span/text()").extract_first()).strip()
-		beian["record_province"] = "河南"
-		beian["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-		beian["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-		beian["is_delete"] = 0
-		yield beian
 	
 

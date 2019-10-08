@@ -6,6 +6,10 @@ import datetime
 
 class XizangSpider(scrapy.Spider):
 	name = 'xizang'
+	custom_settings = {
+		'DOWNLOAD_DELAY': '0.1',
+		# 'DOWNLOADER_MIDDLEWARES': {'provinceproject.middlewares.AbuyunProxyMiddleware': 543, }
+	}
 	#allowed_domains = ['111.11.196.111/aspx/corpinfo/CorpInfo.aspx']
 	start_urls = ['http://111.11.196.111/aspx/corpinfo/CorpInfo.aspx/']
 	def parse(self, response):
@@ -22,37 +26,36 @@ class XizangSpider(scrapy.Spider):
 					company_url="http://111.11.196.111/aspx/corpinfo/CorpDetailInfo.aspx?"+company_url.split("?")[-1]
 					yield Request(company_url,callback=self.parse_company)
 	def parse_company(self,response):
-		xizang=XizangItem()
-		xizang["id"] = response.url.split("=")[-1]
-		xizang["name"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[1]/td[2]/text()").extract_first()
-		xizang["leal_person"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[3]/td[2]/text()").extract_first()
-		xizang["regis_type"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[4]/td[2]/text()").extract_first()
-		xizang["contact_person"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[5]/td[2]/text()").extract_first()
-		xizang["contact_address"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[6]/td[2]/text()").extract_first()
-		xizang["registered_capital"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[2]/td[4]/span[@id='regmoney']/text()").extract_first()
-		xizang["leal_person_title"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[3]/td[4]/text()").extract_first()
-		xizang["build_date"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[4]/td[4]/text()").extract_first()
-		xizang["reg_address_province"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[5]/td[4]/text()").extract_first()
-		xizang["social_credit_code"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[2]/td[6]/text()").extract_first()
-		if xizang["social_credit_code"] is None:
-			xizang["social_credit_code"]=response.xpath("//div[@class='col-sm-12']/table/tbody/tr[2]/td[2]/text()").extract_first()
-		xizang["leal_person_duty"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[3]/td[6]/text()").extract_first()
-		xizang["postalcode"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[4]/td[6]/text()").extract_first()
-		xizang["reg_address_city"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[5]/td[6]/text()").extract_first()
-		xizang["url"] =response.url
-		xizang["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-		xizang["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-		xizang["is_delete"] = 0
+		c_info = CompanyInfomortation()
+		c_info["province_company_id"] = "xizang_" + response.url.split("=")[-1]
+		c_info["company_name"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[1]/td[2]/text()").extract_first()
+		c_info["leal_person"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[3]/td[2]/text()").extract_first()
+		c_info["regis_type"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[4]/td[2]/text()").extract_first()
+		c_info["contact_person"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[5]/td[2]/text()").extract_first()
+		c_info["contact_address"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[6]/td[2]/text()").extract_first()
+		c_info["registered_capital"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[2]/td[4]/span[@id='regmoney']/text()").extract_first()
+		c_info["leal_person_title"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[3]/td[4]/text()").extract_first()
+		c_info["build_date"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[4]/td[4]/text()").extract_first()
+		c_info["regis_address"] =str(response.xpath("//div[@class='col-sm-12']/table/tbody/tr[5]/td[4]/text()").extract_first()) + str(response.xpath("//div[@class='col-sm-12']/table/tbody/tr[5]/td[6]/text()").extract_first())
+		c_info["social_credit_code"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[2]/td[6]/text()").extract_first()
+		if c_info["social_credit_code"] is None:
+			c_info["social_credit_code"]=response.xpath("//div[@class='col-sm-12']/table/tbody/tr[2]/td[2]/text()").extract_first()
+		c_info["leal_person_duty"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[3]/td[6]/text()").extract_first()
+		c_info["postalcode"] =response.xpath("//div[@class='col-sm-12']/table/tbody/tr[4]/td[6]/text()").extract_first()
+		c_info["url"] =response.url
+		c_info["source"] = "西藏"
+		yield c_info
 		table_list=response.xpath("//div[@id='company_info_zizhi']/table")
 		if table_list:
 			for table in table_list:
-				xizang["aptitude_num"] =table.xpath("./tbody/tr[1]/td[2]/text()").extract_first()
-				xizang["aptitude_accept_date"] =table.xpath("./tbody/tr[2]/td[2]/text()").extract_first()
-				xizang["aptitude_range"] =table.xpath("./tbody/tr[3]/td[2]/text()").extract_first()
-				xizang["aptitude_organ"] =table.xpath("./tbody/tr[1]/td[4]/text()").extract_first()
-				xizang["aptitude_useful_date"] =table.xpath("./tbody/tr[2]/td[4]/text()").extract_first()
-				xizang["tech_lead"] =table.xpath("./tbody/tr[2]/td[6]/text()").extract_first()
-				yield xizang
-		else:
-			yield xizang
+				c_apt = CompanyaptitudeItem()
+				c_apt["province_company_id"] = c_info["province_company_id"]
+				c_apt["company_name"] = c_info["company_name"]
+				c_apt["source"] = "西藏"
+				c_apt["aptitude_id"] =table.xpath("./tbody/tr[1]/td[2]/text()").extract_first()
+				c_apt["aptitude_startime"] =table.xpath("./tbody/tr[2]/td[2]/text()").extract_first()
+				c_apt["aptitude_name"] =table.xpath("./tbody/tr[3]/td[2]/text()").extract_first()
+				c_apt["aptitude_organ"] =table.xpath("./tbody/tr[1]/td[4]/text()").extract_first()
+				c_apt["aptitude_endtime"] =table.xpath("./tbody/tr[2]/td[4]/text()").extract_first()
+				yield c_apt
 

@@ -6,6 +6,10 @@ from provinceproject.items import *
 
 class HenanSpider(scrapy.Spider):
 	name = 'henan'
+	custom_settings = {
+		'DOWNLOAD_DELAY': '0.1',
+		# 'DOWNLOADER_MIDDLEWARES': {'provinceproject.middlewares.AbuyunProxyMiddleware': 543, }
+	}
 	#allowed_domains = ['hngcjs.hnjs.gov.cn/SiKuWeb/QiyeList.aspx?type=qyxx']
 	start_urls = ['http://hngcjs.hnjs.gov.cn/SiKuWeb/QiyeList.aspx?type=qyxx']
 
@@ -34,42 +38,42 @@ class HenanSpider(scrapy.Spider):
 			yield Request(company_url,callback=self.parse_company,meta={"CorpCode":CorpCode,"CorpName":CorpName})
 
 	def parse_company(self,response):
-		henan = HenanItem()
-		henan["id"] = response.meta.get("CorpCode")
-		henan["name"] = str(response.xpath("//table[@class='Tab']/tr[2]/td[2]/span/text()").extract_first()).strip()
-		henan["reg_address"] = str(response.xpath("//table[@class='Tab']/tr[3]/td[2]/span/text()").extract_first()).strip()
-		henan["build_date"] = str(response.xpath("//table[@class='Tab']/tr[4]/td[2]/span/text()").extract_first()).strip()
-		henan["address"] = str(response.xpath("//table[@class='Tab']/tr[5]/td[2]/span/text()").extract_first()).strip()
-		henan["leal_person"] = str(response.xpath("//table[@class='Tab']/tr[6]/td[2]/span/text()").extract_first()).strip()
-		henan["contact_person"] = str(response.xpath("//table[@class='Tab']/tr[7]/td[2]/span/text()").extract_first()).strip()
-		henan["social_credit_code"] = response.xpath("//table[@class='Tab']/tr[2]/td[4]/span/text()").extract_first()
-		if not henan["social_credit_code"]:
-			henan["social_credit_code"] = str(response.xpath("//table[@class='Tab']/tr[4]/td[4]/span/text()").extract_first()).strip()
+		c_info = CompanyInfomortation()
+		c_info["province_company_id"] = "henan_" + response.meta.get("CorpCode")
+		c_info["company_name"] = str(response.xpath("//table[@class='Tab']/tr[2]/td[2]/span/text()").extract_first()).strip()
+		c_info["regis_address"] = str(response.xpath("//table[@class='Tab']/tr[3]/td[2]/span/text()").extract_first()).strip()
+		c_info["build_date"] = str(response.xpath("//table[@class='Tab']/tr[4]/td[2]/span/text()").extract_first()).strip()
+		c_info["business_address"] = str(response.xpath("//table[@class='Tab']/tr[5]/td[2]/span/text()").extract_first()).strip()
+		c_info["leal_person"] = str(response.xpath("//table[@class='Tab']/tr[6]/td[2]/span/text()").extract_first()).strip()
+		c_info["contact_person"] = str(response.xpath("//table[@class='Tab']/tr[7]/td[2]/span/text()").extract_first()).strip()
+		c_info["social_credit_code"] = response.xpath("//table[@class='Tab']/tr[2]/td[4]/span/text()").extract_first()
+		if not c_info["social_credit_code"]:
+			c_info["social_credit_code"] = str(response.xpath("//table[@class='Tab']/tr[4]/td[4]/span/text()").extract_first()).strip()
 		else:
-			henan["social_credit_code"] = str(henan["social_credit_code"]).strip()
-		henan["regis_type"] = str(response.xpath("//table[@class='Tab']/tr[3]/td[4]/span/text()").extract_first()).strip()
-		henan["postalcode"] = str(response.xpath("//table[@class='Tab']/tr[5]/td[4]/span/text()").extract_first()).strip()
-		henan["tech_lead_duty"] = str(response.xpath("//table[@class='Tab']/tr[6]/td[4]/span/text()").extract_first()).strip()
-		henan["website"] = str(response.xpath("//table[@class='Tab']/tr[7]/td[4]/span/text()").extract_first()).strip()
-		henan["url"] = response.url
-		henan["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-		henan["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-		henan["is_delete"] = 0
+			c_info["social_credit_code"] = str(c_info["social_credit_code"]).strip()
+		c_info["regis_type"] = str(response.xpath("//table[@class='Tab']/tr[3]/td[4]/span/text()").extract_first()).strip()
+		c_info["postalcode"] = str(response.xpath("//table[@class='Tab']/tr[5]/td[4]/span/text()").extract_first()).strip()
+		c_info["leal_person_duty"] = str(response.xpath("//table[@class='Tab']/tr[6]/td[4]/span/text()").extract_first()).strip()
+		c_info["website"] = str(response.xpath("//table[@class='Tab']/tr[7]/td[4]/span/text()").extract_first()).strip()
+		c_info["url"] = response.url
+		c_info["source"] = "河南"
+		yield c_info
 		aptitude_url = "http://hngcjs.hnjs.gov.cn/SiKuWeb/Qyzz.aspx?corpname={}&CorpCode={}".format(response.meta.get("CorpName"),response.meta.get("CorpCode"))
-		yield Request(aptitude_url,callback=self.parse_aptitude,meta={"henan":henan})
+		yield Request(aptitude_url,callback=self.parse_aptitude,meta={"province_company_id":c_info["province_company_id"],"company_name":c_info["company_name"]})
 	def parse_aptitude(self,response):
-		henan =response.meta.get("henan")
 		table_list = response.xpath("//table[@class='Tab']")
 		if table_list:
 			for table in table_list:
-				henan["aptitude_type"] = str(table.xpath("./tr[1]/td/span/text()").extract_first()).strip()
-				henan["aptitude_num"] = str(table.xpath("./tr[2]/td[2]/span/text()").extract_first()).strip()
-				henan["aptitude_accept_date"] = str(table.xpath("./tr[3]/td[2]/span/text()").extract_first()).strip()
-				henan["aptitude_range"] = str(table.xpath("./tr[4]/td[2]/span/text()").extract_first()).strip()
-				henan["aptitude_organ"] = str(table.xpath("./tr[2]/td[4]/span/text()").extract_first()).strip()
-				henan["aptitude_useful_date"] = str(table.xpath("./tr[3]/td[4]/span/text()").extract_first()).strip()
-				yield henan
-				
-		else:
-			yield henan
+				c_apt = CompanyaptitudeItem()
+				c_apt["province_company_id"] = response.meta.get("province_company_id")
+				c_apt["company_name"] = response.meta.get("company_name")
+				c_apt["source"] = "河南"
+				c_apt["aptitude_type"] = str(table.xpath("./tr[1]/td/span/text()").extract_first()).strip()
+				c_apt["aptitude_id"] = str(table.xpath("./tr[2]/td[2]/span/text()").extract_first()).strip()
+				c_apt["aptitude_startime"] = str(table.xpath("./tr[3]/td[2]/span/text()").extract_first()).strip()
+				c_apt["aptitude_name"] = str(table.xpath("./tr[4]/td[2]/span/text()").extract_first()).strip()
+				c_apt["aptitude_organ"] = str(table.xpath("./tr[2]/td[4]/span/text()").extract_first()).strip()
+				c_apt["aptitude_endtime"] = str(table.xpath("./tr[3]/td[4]/span/text()").extract_first()).strip()
+				yield c_apt
+
 

@@ -7,6 +7,10 @@ import datetime
 
 class AnhuibeianSpider(scrapy.Spider):
 	name = 'anhuibeian'
+	custom_settings = {
+		'DOWNLOAD_DELAY': '1',
+		# 'DOWNLOADER_MIDDLEWARES' : {'provinceproject.middlewares.AbuyunProxyMiddleware': 543}
+	}
 	#allowed_domains = ['dohurd.ah.gov.cn/ahzjt_Front']
 	start_urls = ['http://dohurd.ah.gov.cn/ahzjt_Front/']
 
@@ -17,12 +21,11 @@ class AnhuibeianSpider(scrapy.Spider):
 			total_page = int(data.get("total",0))
 			listinfo = data.get("listinfo")
 			for info in listinfo:
-				rowguid = info.get("rowguid")
-				company_url = "http://dohurd.ah.gov.cn/epoint-mini/rest/function/searchQYXQYM"
-				c_formdata = {
-					'rowguid': rowguid
-				}
-				yield FormRequest(company_url,formdata = c_formdata,callback = self.parse_company,meta = {"rowguid":rowguid})
+				beian = BeianItem()
+				beian["social_credit_code"] = info.get("corpcode")
+				beian["company_name"] = info.get("corpname")
+				beian["record_province"] = "安徽"
+				yield beian
 		except:
 			pageindex = 0
 			total_page = 2
@@ -41,18 +44,18 @@ class AnhuibeianSpider(scrapy.Spider):
 			}
 			yield FormRequest(url,formdata = formdata,callback = self.parse)
 
-	def parse_company(self,response):
-		ds = json.loads(response.text).get("QYXQ")
-		if ds:
-			beian = BeianItem()
-			beian["corpname"] = ds.get("corpname")
-			beian["corpcode"] = ds.get("corpcode")
-			beian["legalman"] = ds.get("legalman")
-			beian["danweitype"] = ds.get("economicnumtext")
-			beian["areaname"] = ds.get("areacodetext")
-			beian["record_province"] = "安徽"
-			beian["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-			beian["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-			beian["is_delete"] = 0
-			yield beian
+	# def parse_company(self,response):
+	# 	ds = json.loads(response.text).get("QYXQ")
+	# 	if ds:
+	# 		beian = BeianItem()
+	# 		beian["corpname"] = ds.get("corpname")
+	# 		beian["corpcode"] = ds.get("corpcode")
+	# 		beian["legalman"] = ds.get("legalman")
+	# 		beian["danweitype"] = ds.get("economicnumtext")
+	# 		beian["areaname"] = ds.get("areacodetext")
+	# 		beian["record_province"] = "安徽"
+	# 		beian["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	# 		beian["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+	# 		beian["is_delete"] = 0
+	# 		yield beian
 

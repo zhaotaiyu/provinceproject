@@ -9,6 +9,10 @@ from provinceproject.items import BeianItem
 
 class ZhejiangbeianSpider(scrapy.Spider):
     name = 'zhejiangbeian'
+    custom_settings = {
+        'DOWNLOAD_DELAY': '1',
+        # 'DOWNLOADER_MIDDLEWARES' : {'provinceproject.middlewares.AbuyunProxyMiddleware': 543}
+    }
     #allowed_domains = ['223.4.65.131:8080/jzba.php?p=1']
     #start_urls = ['http://223.4.65.131:8080/jzba.php?p=1&State=%E5%AE%A1%E6%A0%B8%E9%80%9A%E8%BF%87']
     custom_settings = {
@@ -28,12 +32,9 @@ class ZhejiangbeianSpider(scrapy.Spider):
         if tr_list:
             for tr in tr_list[1:]:
                 beian = BeianItem()
-                beian["corpname"] = tr.xpath("./td[2]/div/text()").extract_first()
-                beian["corpcode"] = tr.xpath("./td[3]/text()").extract_first()
+                beian["company_name"] = tr.xpath("./td[2]/div/text()").extract_first()
+                beian["social_credit_code"] = tr.xpath("./td[3]/text()").extract_first()
                 beian["record_province"] = "浙江"
-                beian["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                beian["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                beian["is_delete"] = 0
                 yield beian
         else:
             myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')

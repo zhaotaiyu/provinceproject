@@ -31,21 +31,24 @@ class BeijingSpider(scrapy.Spider):
 					company_url="http://zjw.beijing.gov.cn"+company_url
 					yield Request(company_url,callback=self.parse_company)
 	def parse_company(self,response):
-		beijing = BeijingItem()
-		beijing["id"] = response.url.split("=")[-1]
-		beijing["name"] = str(response.xpath("//table[@class='detailview']/tbody/tr[1]/td[2]/text()").extract_first()).strip()
-		beijing["address"] = str(response.xpath("//table[@class='detailview']/tbody/tr[2]/td[2]/text()").extract_first()).strip()
-		beijing["registered_capital"] = str(response.xpath("//table[@class='detailview']/tbody/tr[3]/td[2]/text()").extract_first()).strip().strip("欧美日人民币(万元)")
-		beijing["social_credit_code"] = str(response.xpath("//table[@class='detailview']/tbody/tr[4]/td[2]/text()").extract_first()).strip()
-		beijing["regis_type"] = str(response.xpath("//table[@class='detailview']/tbody/tr[5]/td[2]/text()").extract_first()).strip()
-		beijing["leal_person"] = str(response.xpath("//table[@class='detailview']/tbody/tr[6]/td[2]/text()").extract_first()).strip()
-		beijing["aptitude_num"] = str(response.xpath("//table[@class='detailview']/tbody/tr[7]/td[2]/text()").extract_first()).strip()
-		beijing["aptitude_range"] = str(response.xpath("//table[@class='detailview']/tbody/tr[8]/td[2]/text()").extract_first()).strip()
-		beijing["aptitude_organ"] = str(response.xpath("//table[@class='detailview']/tbody/tr[9]/td[2]/text()").extract_first()).strip()
-		beijing["aptitude_accept_date"] = response.xpath("//table[@class='detailview']/tbody/tr[10]/td[2]/span[1]/text()").extract_first()
-		beijing["aptitude_useful_date"] = response.xpath("//table[@class='detailview']/tbody/tr[10]/td[2]/span[2]/text()").extract_first()
-		beijing["url"] = response.url
-		beijing["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-		beijing["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-		beijing["is_delete"]=0
-		yield beijing
+		c_info  = CompanyInfomortation()
+		c_info["province_company_id"] = "beijing_" + response.url.split("=")[-1]
+		c_info["company_name"] = str(response.xpath("//table[@class='detailview']/tbody/tr[1]/td[2]/text()").extract_first()).strip()
+		c_info["regis_address"] = str(response.xpath("//table[@class='detailview']/tbody/tr[2]/td[2]/text()").extract_first()).strip()
+		c_info["registered_capital"] = str(response.xpath("//table[@class='detailview']/tbody/tr[3]/td[2]/text()").extract_first()).strip().strip("欧美日人民币(万元)")
+		c_info["social_credit_code"] = str(response.xpath("//table[@class='detailview']/tbody/tr[4]/td[2]/text()").extract_first()).strip()
+		c_info["regis_type"] = str(response.xpath("//table[@class='detailview']/tbody/tr[5]/td[2]/text()").extract_first()).strip()
+		c_info["leal_person"] = str(response.xpath("//table[@class='detailview']/tbody/tr[6]/td[2]/text()").extract_first()).strip()
+		c_info["url"] = response.url
+		c_info["source"] = "北京"
+		yield c_info
+		c_apt = CompanyaptitudeItem()
+		c_apt["province_company_id"] = c_info["province_company_id"]
+		c_apt["company_name"] = c_info["company_name"]
+		c_apt["source"] = "北京"
+		c_apt["aptitude_id"] = str(response.xpath("//table[@class='detailview']/tbody/tr[7]/td[2]/text()").extract_first()).strip()
+		c_apt["aptitude_name"] = str(response.xpath("//table[@class='detailview']/tbody/tr[8]/td[2]/text()").extract_first()).strip()
+		c_apt["aptitude_organ"] = str(response.xpath("//table[@class='detailview']/tbody/tr[9]/td[2]/text()").extract_first()).strip()
+		c_apt["aptitude_startime"] = response.xpath("//table[@class='detailview']/tbody/tr[10]/td[2]/span[1]/text()").extract_first()
+		c_apt["aptitude_endtime"] = response.xpath("//table[@class='detailview']/tbody/tr[10]/td[2]/span[2]/text()").extract_first()
+		yield c_apt

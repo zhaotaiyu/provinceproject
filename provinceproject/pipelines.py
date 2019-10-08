@@ -5,9 +5,14 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import datetime
+import json
 import pymongo
 import psycopg2
+import pykafka
+from pykafka import KafkaClient
+from pykafka.exceptions import SocketDisconnectedError, LeaderNotAvailable
 from .settings import *
+
 
 
 class CeshiPipeline(object):
@@ -17,8 +22,12 @@ class CeshiPipeline(object):
 class ProvinceprojectPipeline(object):
     def process_item(self, item, spider):
         for key, value in item.items():
-            if value is None:
+            if value in [None,""]:
                 item[key] = "None"
+        item["status"] = 1
+        item["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        item["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        item["is_delete"] = 0
         return item
 
 class PgsqlPipeline(object):
@@ -51,7 +60,7 @@ class PgsqlPipeline(object):
         self.db.close()
     def process_item(self,item,spider):
         ite=dict(item)
-        sql="INSERT INTO {} (".format(item.collection)
+        sql="INSERT INTO province.{} (".format(item.collection)
         v_list=[]
         k_list=[]
         for key,value in ite.items():
@@ -67,7 +76,6 @@ class PgsqlPipeline(object):
         try:
             self.cursor.execute(sql)
             self.db.commit()
-            print("写入一条")
         except Exception as e:
             self.db.rollback()
             try:
@@ -85,3 +93,33 @@ class PgsqlPipeline(object):
                 mycol.insert_one(mydict)
                 myclient.close()
         return item
+class ScrapyKafkaPipeline(object):
+    def __init__(self):
+        kafka_ip_port = BOOTSTRAP_SERVER
+        # 初始化client
+        self._client = pykafka.KafkaClient(hosts=kafka_ip_port)
+        # 初始化Producer 需要把topic name变成字节的形式
+        self._producer = self._client.topics[TOPIC.encode(encoding="UTF-8")].get_producer()
+    def process_item(self, item, spider):
+        msg={
+            "collection":item.collection,
+            "content":dict(item)
+        }
+        try:
+            self._producer.produce(json.dumps((msg),ensure_ascii=False).encode(encoding="UTF-8"))
+        except (SocketDisconnectedError, LeaderNotAvailable) as e:
+            try:
+                self._producer = self._client.topics[TOPIC.encode(encoding="UTF-8")].get_producer()
+                self._producer.stop()
+                self._producer.start()
+                self._producer.produce(json.dumps((msg),ensure_ascii=False).encode(encoding="UTF-8"))
+            except Exception as e:
+                myclient = pymongo.MongoClient('mongodb://ecs-a025-0002:27017/')
+                mydb=myclient[MONGODATABASE]
+                mycol=mydb[MONGOTABLE]
+                mydict = {"item":msg,"reason":"写入kafka失败",'time':datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                mycol.insert_one(mydict)
+                myclient.close()
+        return item
+    def close_spider(self, spider):
+        self._producer.stop()

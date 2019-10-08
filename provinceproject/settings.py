@@ -39,6 +39,19 @@ DOWNLOAD_DELAY = 0.3
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
+# DEFAULT_REQUEST_HEADERS = {
+#     'Connection': 'keep-alive',
+#     'Cache-Control': 'max-age=0',
+#     'Origin': 'http://dn4.gxzjt.gov.cn:1141',
+#     'Upgrade-Insecure-Requests': '1',
+#     'Content-Type': 'application/x-www-form-urlencoded',
+#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
+#     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+#     'Referer': 'http://dn4.gxzjt.gov.cn:1141/WebInfo/Enterprise/Enterprise.aspx',
+#     'Accept-Encoding': 'gzip, deflate',
+#     'Accept-Language': 'zh-CN,zh;q=0.9',
+# }
+
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
@@ -63,9 +76,10 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    #'provinceproject.pipelines.CeshiPipeline': 209,
+    # 'provinceproject.pipelines.CeshiPipeline': 209,
     'provinceproject.pipelines.ProvinceprojectPipeline': 300,
     'provinceproject.pipelines.PgsqlPipeline': 301,
+    # 'provinceproject.pipelines.ScrapyKafkaPipeline': 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -92,7 +106,7 @@ ITEM_PIPELINES = {
 LOG_LEVEL= 'DEBUG'
 #PGSQL
 PGSQL_URI="ecs-a025-0002"
-PGSQL_DATABASE="province"
+PGSQL_DATABASE="cic_database"
 PGSQL_PASS="sikuyi"
 PGSQL_USER="postgres"
 PGSQL_PORT=54321
@@ -113,3 +127,7 @@ MONGOTABLE='province'
 #快代理配置
 KUAI_USERNAME="zhao_tai_yu"
 KUAI_PASSWORD="7av2i9t5"
+
+#KAFKA配置
+BOOTSTRAP_SERVER="49.4.90.247:6667"
+TOPIC="TOPIC_sikuyifinally"

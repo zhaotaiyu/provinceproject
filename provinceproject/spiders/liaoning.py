@@ -5,6 +5,10 @@ from scrapy import FormRequest,Request
 from provinceproject.items import *
 class LiaoningSpider(scrapy.Spider):
     name = 'liaoning'
+    custom_settings = {
+        'DOWNLOAD_DELAY': '0.1',
+        # 'DOWNLOADER_MIDDLEWARES': {'provinceproject.middlewares.AbuyunProxyMiddleware': 543, }
+    }
     #allowed_domains = ['218.60.144.163/LNJGPublisher/corpinfo/CorpInfo.aspx']
     start_urls = ['http://218.60.144.163/LNJGPublisher/corpinfo/CorpInfo.aspx/']
     def parse(self, response):
@@ -49,30 +53,30 @@ class LiaoningSpider(scrapy.Spider):
                     company_url="http://218.60.144.163/LNJGPublisher/corpinfo/CorpDetailInfo.aspx?rowGuid={}&CorpCode={}&CorpName={}&VType=1".format(rowGuid,CorpCode,CorpName)
                     yield Request(company_url,callback=self.parse_company,meta={"CorpCode":CorpCode,"CorpName":CorpName})
     def parse_company(self,response):
-        liaoning=LiaoningItem()
-        liaoning["id"] =response.meta.get("CorpCode")
-        liaoning["name"] =response.meta.get("CorpName")
-        liaoning["social_credit_code"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[2]/td[2]/text()").extract_first()).strip()
-        liaoning["leal_person"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[2]/td[2]/text()").extract_first()).strip()
-        liaoning["reg_address"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[3]/td[2]/text()").extract_first()).strip()
-        liaoning["remark"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[4]/td[2]/text()").extract_first()).strip()
-        liaoning["regis_type"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[3]/td[4]/text()").extract_first()).strip()
-        liaoning["contact_address"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[4]/td[4]/text()").extract_first()).strip()
-        liaoning["url"] = response.url
-        liaoning["create_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        liaoning["modification_time"] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        liaoning["is_delete"] = 0
+        c_info=CompanyaptitudeItem()
+        c_info["province_company_id"] = "liaoning_" + response.meta.get("CorpCode")
+        c_info["company_name"] =response.meta.get("CorpName")
+        c_info["social_credit_code"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[2]/td[2]/text()").extract_first()).strip()
+        c_info["leal_person"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[2]/td[2]/text()").extract_first()).strip()
+        c_info["regis_address"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[3]/td[2]/text()").extract_first()).strip()
+        c_info["regis_type"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[3]/td[4]/text()").extract_first()).strip()
+        c_info["contact_address"] =str(response.xpath("//table[@class='cpd_basic_table']/tr[4]/td[4]/text()").extract_first()).strip()
+        c_info["url"] = response.url
+        c_info["source"] = "辽宁"
+        yield c_info
         table_list=response.xpath("//table[@class='no_list_table']")
         if table_list:
             for table in table_list:
-                liaoning["aptitude_num"] =str(table.xpath("./tr[1]/td[2]/text()").extract_first()).strip()
-                liaoning["aptitude_accept_date"] =str(table.xpath("./tr[2]/td[2]/text()").extract_first()).strip()
-                liaoning["aptitude_range"] =str(table.xpath("./tr[3]/td[2]/text()").extract_first()).strip()
-                liaoning["aptitude_organ"] =str(table.xpath("./tr[1]/td[4]/text()").extract_first()).strip()
-                liaoning["aptitude_useful_date"] =str(table.xpath("./tr[2]/td[4]/text()").extract_first()).strip()
-                yield liaoning
-        else:
-            yield liaoning
+                c_apt = CompanyaptitudeItem()
+                c_apt["province_company_id"] = c_info["province_company_id"]
+                c_apt["company_name"] = c_info["company_name"]
+                c_apt["source"] = "辽宁"
+                c_apt["aptitude_id"] =str(table.xpath("./tr[1]/td[2]/text()").extract_first()).strip()
+                c_apt["aptitude_accept_date"] =str(table.xpath("./tr[2]/td[2]/text()").extract_first()).strip()
+                c_apt["aptitude_range"] =str(table.xpath("./tr[3]/td[2]/text()").extract_first()).strip()
+                c_apt["aptitude_organ"] =str(table.xpath("./tr[1]/td[4]/text()").extract_first()).strip()
+                c_apt["aptitude_useful_date"] =str(table.xpath("./tr[2]/td[4]/text()").extract_first()).strip()
+                yield c_apt
 #备案企业列表
     def parse_beiancompanylist(self,response):
         tr_list = response.xpath("//div[@id='div_outCast']/div[1]/table/tbody/tr")
