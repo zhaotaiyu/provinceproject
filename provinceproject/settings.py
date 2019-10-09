@@ -78,8 +78,8 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
     # 'provinceproject.pipelines.CeshiPipeline': 209,
     'provinceproject.pipelines.ProvinceprojectPipeline': 300,
-    'provinceproject.pipelines.PgsqlPipeline': 301,
-    # 'provinceproject.pipelines.ScrapyKafkaPipeline': 302,
+    # 'provinceproject.pipelines.PgsqlPipeline': 301,
+    'provinceproject.pipelines.ScrapyKafkaPipeline': 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
