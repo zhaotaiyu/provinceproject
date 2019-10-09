@@ -78,8 +78,8 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
     # 'provinceproject.pipelines.CeshiPipeline': 209,
     'provinceproject.pipelines.ProvinceprojectPipeline': 300,
-    # 'provinceproject.pipelines.PgsqlPipeline': 301,
-    'provinceproject.pipelines.ScrapyKafkaPipeline': 302,
+    'provinceproject.pipelines.PgsqlPipeline': 301,
+    # 'provinceproject.pipelines.ScrapyKafkaPipeline': 302,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -115,7 +115,7 @@ PGSQL_PORT=54321
 #DOWNLOAD_TIMEOUT=100
 RETRY_HTTP_CODES = [500, 502, 503, 504, 400, 403, 408, 429, 407]
 RETRY_TIMES = 10
-HTTPERROR_ALLOWED_CODES = [500, 502, 503, 504, 400, 403, 408, 429, 407]
+HTTPERROR_ALLOWED_CODES = [301,302, 500, 502, 503, 504, 400, 403, 408, 429, 407]
 #abuyun代理配置
 PROXYUSER="HR58I089C2G8N57D"
 PROXYPASS="3EB3D83115080960"

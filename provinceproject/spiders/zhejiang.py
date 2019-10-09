@@ -30,8 +30,6 @@ class ZhejiangSpider(scrapy.Spider):
 				'page': alt
 			}
 			yield FormRequest(response.url,formdata=formdata,callback=self.parse)
-
-
 	def parse_company(self,response):
 		#http://115.29.2.37:8080/enterprise_detail.php?CORPCODE=56605492-1&SCUCode=91330105566054921P 无资质
 		c_info = CompanyInfomortation()
