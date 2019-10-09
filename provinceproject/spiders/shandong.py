@@ -10,7 +10,7 @@ from provinceproject.items import *
 class ShandongSpider(scrapy.Spider):
     name = 'shandong'
     custom_settings = {
-        'DOWNLOAD_DELAY': '0.3',
+        'DOWNLOAD_DELAY': '0.1',
         #'DOWNLOADER_MIDDLEWARES': {'provinceproject.middlewares.AbuyunProxyMiddleware': 543, }
     }
     #allowed_domains = ['zjt.shandong.gov.cn']
@@ -29,39 +29,42 @@ class ShandongSpider(scrapy.Spider):
                     CorpCode=corp.get("CorpCode")
                     CorpNamefdc=corp.get("CorpName")
                     company_url="http://221.214.94.41:81/InformationReleasing/Ashx/InformationReleasing.ashx?methodname=GetCorpQualificationCertInfo&CorpCode={}&CorpNamefdc={}&CurrPageIndex=1&PageSize=12&_=1565145293507".format(CorpCode,CorpNamefdc)
-                    yield Request(company_url,callback=self.parse_company)
+                    #yield Request(company_url,callback=self.parse_company)
             total = json.loads(response.text).get("data").get("TotalNum")
             if int(response.meta.get("page"))*12<int(total):
                 page = response.meta.get("page") + 1
+                print(page)
                 url = "http://221.214.94.41:81/InformationReleasing/Ashx/InformationReleasing.ashx?methodname=GetCorpInfo&CorpName=&CorpCode=&CertType=112&LegalMan=&CurrPageIndex={}&PageSize=12&_=1565141169809".format(page)
                 yield Request(url,callback=self.parse,meta={"page":page})
         else:
             yield Request(response.url,callback=self.parse,dont_filter=True,meta={"page":response.meta.get("page"),})
     def parse_company(self,response):
-        c_info=CompanyInfomortation()
-        corpqualificationcertlist = json.loads(response.text).get("data").get("CorpQualificationCertList")
-        if corpqualificationcertlist:
-            for company in corpqualificationcertlist[1:2]:
-                c_info["province_company_id"] = "shandong_" + company.get("CorpCode")
-                c_info["social_credit_code"] = company.get("CorpCode")
-                c_info["company_name"] = company.get("CorpName")
-                c_info["source"] = "山东"
-                c_info["ceoname"] = company.get("CEOName")
-                c_info["ctoname"] = company.get("CTOName")
-                yield c_info
-            for company in corpqualificationcertlist:
-                c_apt = CompanyaptitudeItem()
-                c_apt["province_company_id"] = "shandong_" + company.get("CorpCode")
-                c_apt["company_name"] = company.get("CorpName")
-                c_apt["aptitude_id"] = company.get("CertID")
-                c_apt["aptitude_organ"] = company.get("OrganName")
-                c_apt["aptitude_startime"] =company.get("OrganDate")
-                c_apt["aptitude_endtime"] = company.get("EndDate")
-                c_apt["aptitude_name"] =company.get("QualificationScope")
-                c_apt["source"] = "山东"
-                yield c_apt
+        if json.loads(response.text).get("status") == "成功":
+            c_info=CompanyInfomortation()
+            corpqualificationcertlist = json.loads(response.text).get("data").get("CorpQualificationCertList")
+            if corpqualificationcertlist:
+                for company in corpqualificationcertlist[1:2]:
+                    c_info["province_company_id"] = "shandong_" + company.get("CorpCode")
+                    c_info["social_credit_code"] = company.get("CorpCode")
+                    c_info["company_name"] = company.get("CorpName")
+                    c_info["source"] = "山东"
+                    c_info["ceoname"] = company.get("CEOName")
+                    c_info["ctoname"] = company.get("CTOName")
+                    yield c_info
+                for company in corpqualificationcertlist:
+                    c_apt = CompanyaptitudeItem()
+                    c_apt["province_company_id"] = "shandong_" + company.get("CorpCode")
+                    c_apt["company_name"] = company.get("CorpName")
+                    c_apt["aptitude_id"] = company.get("CertID")
+                    c_apt["aptitude_organ"] = company.get("OrganName")
+                    c_apt["aptitude_startime"] =company.get("OrganDate")
+                    c_apt["aptitude_endtime"] = company.get("EndDate")
+                    c_apt["aptitude_name"] =company.get("QualificationScope")
+                    c_apt["source"] = "山东"
+                    yield c_apt
+        else:
+            yield Request(response.url,callback=self.parse,dont_filter=True)
     def parse_beian(self,response):
-        print(response.text)
         total = json.loads(response.text).get("data").get("TotalNum")
         status = json.loads(response.text).get("status")
         if status =="成功":

@@ -69,14 +69,14 @@ class HainanSpider(scrapy.Spider):
         c_info["registered_capital"] = response.xpath("//span[@id='ID_IntegrityMge_ucShow_txtRegPrin']/text()").extract_first()
         c_info["build_date"] = response.xpath("//span[@id='ID_IntegrityMge_ucShow_txtFoundDate']/text()").extract_first()
         c_info["url"] = response.url
-        c_info["source"] = "北京"
+        c_info["source"] = "海南"
         yield c_info
         table_list = response.xpath("//center/table")
         for table in table_list:
             c_apt = CompanyaptitudeItem()
             c_apt["province_company_id"] = c_info["province_company_id"]
             c_apt["company_name"] = c_info["company_name"]
-            c_apt["source"] = "北京"
+            c_apt["source"] = "海南"
             c_apt["aptitude_type"] = table.xpath("./tr[2]/td/table/tr[2]/td[2]/span/text()").extract_first()
             c_apt["aptitude_endtime"] = table.xpath("./tr[2]/td/table/tr[4]/td[2]/span/text()").extract_first()
             c_apt["aptitude_id"] = table.xpath("./tr[2]/td/table/tr[2]/td[4]/span/text()").extract_first()
@@ -99,12 +99,12 @@ class HainanSpider(scrapy.Spider):
         c_info["business_address"] = response.xpath("//span[@id='ID_IntegrityMge_ucShowZJ_txtAddress']/text()").extract_first()
         c_info["leal_person"] = response.xpath("//span[@id='ID_IntegrityMge_ucShowZJ_txtLegalPerson']/text()").extract_first()
         c_info["url"] = response.url
-        c_info["source"] = "北京"
+        c_info["source"] = "海南"
         yield c_info
         c_apt = CompanyaptitudeItem()
         c_apt["province_company_id"] = c_info["province_company_id"]
         c_apt["company_name"] = c_info["company_name"]
-        c_apt["source"] = "北京"
+        c_apt["source"] = "海南"
         c_apt["aptitude_type"] = response.xpath("//span[@id='ID_IntegrityMge_ucShowZJ_ucCorpCertListShow1_listCert_ctl00_ucCorpCertShow1_txtCertTypeNum']/text()").extract_first()
         c_apt["aptitude_endtime"] = response.xpath("//span[@id='ID_IntegrityMge_ucShowZJ_ucCorpCertListShow1_listCert_ctl00_ucCorpCertShow1_txtEndDate']/text()").extract_first()
         c_apt["aptitude_id"] = response.xpath("//span[@id='ID_IntegrityMge_ucShowZJ_ucCorpCertListShow1_listCert_ctl00_ucCorpCertShow1_txtCertID']/text()").extract_first()
